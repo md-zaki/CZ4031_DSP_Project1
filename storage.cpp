@@ -19,9 +19,9 @@ Storage::Storage(unsigned int totalDiskSize,unsigned int blockSize){
 }
 
 Storage::~Storage() {
+  currentBlockPtr = nullptr;
   delete diskPtr;
   diskPtr = nullptr;
-  currentBlockPtr = nullptr;
 }
 
 // to do: add functions to add, delete, retrieve records etc
