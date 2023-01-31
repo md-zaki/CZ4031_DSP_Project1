@@ -25,8 +25,8 @@ class Storage {
         int numUsedBlocks; //total number of blocks used
         int numRecordsAssigned; // number of records assigned to database system
 
-        unsigned int *diskPtr; // pointer to start of storage
-        unsigned int *currentBlockPtr; // pointer to start of current block
+        void *diskPtr; // pointer to start of storage
+        void *currentBlockPtr; // pointer to start of current block
 
 
     public:
@@ -39,6 +39,8 @@ class Storage {
 
         //Destructor
         ~Storage(); 
+
+        // to do: add functions to add, delete, retrieve records etc
 };
 
 #endif
