@@ -12,6 +12,12 @@ struct Record {
     char tconst[10]; //movie id
     float averageRating; //average rating of movie
     unsigned int numVotes; //number of ratings on movie
+    
+};
+
+struct RecordLocation {
+    void *blockAddress;
+    unsigned int offset;
 };
 
 class Storage {
