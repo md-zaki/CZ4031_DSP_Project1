@@ -26,6 +26,7 @@ class StorageDisk {
         unsigned int blockSize; //size in bytes of 1 block
         unsigned int usedBlocksSize; //size in bytes of all used blocks
         unsigned int assignedRecordsSize; // size in bytes of all records assigned to blocks
+        unsigned int currentBlockSizeUsed; // size in bytes of current used space in current block
 
         int totalBlocks; // total number of blocks in database system
         int numUsedBlocks; //total number of blocks used
