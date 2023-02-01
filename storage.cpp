@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Storage::Storage(unsigned int totalDiskSize,unsigned int blockSize){
+StorageDisk::StorageDisk(unsigned int totalDiskSize,unsigned int blockSize){
     //assigning values to Storage class variables
     this->totalDiskSize = totalDiskSize;
     this->blockSize = blockSize;
@@ -18,10 +18,11 @@ Storage::Storage(unsigned int totalDiskSize,unsigned int blockSize){
     this->currentBlockPtr = nullptr; // initial block ptr null, no data loaded yet
 }
 
-Storage::~Storage() {
-  delete diskPtr;
-  diskPtr = nullptr;
-  currentBlockPtr = nullptr;
+StorageDisk::~StorageDisk() {
+}
+
+int StorageDisk::getTotalBlocks() {
+  return this->totalBlocks;
 }
 
 // to do: add functions to add, delete, retrieve records etc
