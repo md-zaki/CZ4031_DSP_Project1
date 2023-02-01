@@ -20,7 +20,7 @@ struct RecordLocation {
     unsigned int offset;
 };
 
-class Storage {
+class StorageDisk {
     private:
         unsigned int totalDiskSize; // size in bytes of the whole disk/main memory
         unsigned int blockSize; //size in bytes of 1 block
@@ -41,10 +41,15 @@ class Storage {
          * @param totalDiskSize size in bytes of the whole disk/main memory
          * @param blockSize size in bytes of 1 block
         */
-        Storage(unsigned int totalDiskSize,unsigned int blockSize);
+        StorageDisk(unsigned int totalDiskSize,unsigned int blockSize);
 
         //Destructor
-        ~Storage(); 
+        ~StorageDisk(); 
+
+        int getTotalBlocks();
+
+        
+
 
         // to do: add functions to add, delete, retrieve records etc
 };
