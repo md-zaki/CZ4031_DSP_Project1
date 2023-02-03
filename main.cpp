@@ -9,6 +9,8 @@ using namespace std;
 #include <vector>
 #include <sstream>
 #include <string.h>
+#include <algorithm>
+#include <cstring>
 
 int main()
 {
@@ -52,34 +54,48 @@ int main()
     //         cout << "numvotes: "<<record.numVotes << endl;
     //     }
 
-
         
     // }
-
-    StorageDisk disk(100000,100);
+  
+    StorageDisk disk(100000000,200);
+    //================= Simulate reading from file ============
     Record record1;
     Record record2;
     record1.averageRating = 5.5;
     record1.numVotes = 100;
-    strcpy(record1.tconst,"t1000");
+    strcpy(record1.tconst,"s1000");
 
     record2.averageRating = 1.5;
     record2.numVotes = 200;
-    strcpy(record2.tconst,"t3000");
-
-    // === allocate block =====
-
-    Record *recordaddress1;
-    *recordaddress1 = record1;
-    Record *recordaddress2;
-    *recordaddress2 = record2;
-
-    disk.currentBlockPtr = disk.diskPtr;
+    strcpy(record2.tconst,"s3000");
     
+    // === allocate block =====\
+
+    int offset = 0; 
+
+    void *temp_rec_add = (unsigned char *)disk.diskPtr + (disk.numUsedBlocks*disk.blockSize) + offset; //set current record address
+    for(int i=0;i<2;i++)
+    {
+        if(i==0)
+        {
+            memcpy(temp_rec_add, &record1, sizeof(record1));
+        }
+        else{
+            memcpy(temp_rec_add, &record2, sizeof(record2));
+        }
+
+        offset = offset + sizeof(record1);
+        temp_rec_add = (unsigned char *)disk.diskPtr + (disk.numUsedBlocks*disk.blockSize) + offset;
 
 
+        
+    }
+    offset = 20;
+    void *currentrecord;
 
+    
+    currentrecord = (unsigned char *)disk.diskPtr+offset;
 
-
+    cout << "Extracted average rating: " << (*((Record *)currentrecord)).tconst << endl;
     return 0;
 }
