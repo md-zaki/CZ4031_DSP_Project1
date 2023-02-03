@@ -90,7 +90,7 @@ int main()
 
         
     }
-    offset = 20;
+    offset = 0;
     void *currentrecord;
 
     
