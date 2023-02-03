@@ -22,7 +22,17 @@ struct RecordLocation {
 
 class StorageDisk {
     private:
-        unsigned int totalDiskSize; // size in bytes of the whole disk/main memory
+        
+
+
+    public:
+        /**
+         * Constructor for Storage class
+         * @param totalDiskSize size in bytes of the whole disk/main memory
+         * @param blockSize size in bytes of 1 block
+        */
+
+       unsigned int totalDiskSize; // size in bytes of the whole disk/main memory
         unsigned int blockSize; //size in bytes of 1 block
         unsigned int usedBlocksSize; //size in bytes of all used blocks
         unsigned int assignedRecordsSize; // size in bytes of all records assigned to blocks
@@ -32,16 +42,8 @@ class StorageDisk {
         int numUsedBlocks; //total number of blocks used
         int numRecordsAssigned; // number of records assigned to database system
 
-        void *diskPtr; // pointer to start of storage
-        void *currentBlockPtr; // pointer to start of current block
-
-
-    public:
-        /**
-         * Constructor for Storage class
-         * @param totalDiskSize size in bytes of the whole disk/main memory
-         * @param blockSize size in bytes of 1 block
-        */
+        char *diskPtr; // pointer to start of storage
+        char *currentBlockPtr; // pointer to start of current block
         StorageDisk(unsigned int totalDiskSize,unsigned int blockSize);
 
         //Destructor
