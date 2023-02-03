@@ -54,7 +54,6 @@ int main()
     //         cout << "numvotes: "<<record.numVotes << endl;
     //     }
 
-
         
     // }
   
@@ -98,12 +97,5 @@ int main()
     currentrecord = (unsigned char *)disk.diskPtr+offset;
 
     cout << "Extracted average rating: " << (*((Record *)currentrecord)).tconst << endl;
-
-    
-
-
-    
-
-
     return 0;
 }
