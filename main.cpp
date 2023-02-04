@@ -14,88 +14,87 @@ using namespace std;
 
 int main()
 {
-    // fstream fin;
+    int blockSize, diskSize;
+    blockSize = 200; // declare blockSize in bytes
+    diskSize = 100000000; // declare whole disk size in bytes
+    StorageDisk disk(diskSize,blockSize); // creating a disk object
 
-  
-    // int linenum, indexnum = 0;
-    // Record record;
-    // record.averageRating=0;
-    // record.numVotes=0;
-    // strcpy(record.tconst,"000000000");
-    // ifstream testData("data/dataSmall.tsv");
-    // if (testData.is_open()){
-    //     string line,index;
-    //     getline(testData,line);
-    //     while(getline(testData,line,'\n'))
-    //     {
-    //         stringstream s(line);
-            
-    //         while(getline(s,index,'\t'))
-    //         {
-    //             if (indexnum == 0)
-    //             {
-    //                 strcpy(record.tconst, index.c_str());
-    //             }
-    //             else if (indexnum ==1)
-    //             {
-    //                 record.averageRating=stof(index);
-    //             }
-    //             else if(indexnum == 2)
-    //             {
-    //                 record.numVotes=stoi(index);
-    //             }
-    //             indexnum = indexnum + 1;
-    //         }
-    //         linenum = linenum + 1;
-    //         indexnum = 0;
-
-    //         cout << "tconst: "<<record.tconst << endl;
-    //         cout << "averagerating: "<<record.averageRating << endl;
-    //         cout << "numvotes: "<<record.numVotes << endl;
-    //     }
-
-        
-    // }
-  
-    StorageDisk disk(100000000,200);
-    //================= Simulate reading from file ============
-    Record record1;
-    Record record2;
-    record1.averageRating = 5.5;
-    record1.numVotes = 100;
-    strcpy(record1.tconst,"s1000");
-
-    record2.averageRating = 1.5;
-    record2.numVotes = 200;
-    strcpy(record2.tconst,"s3000");
     
-    // === allocate block =====\
+    fstream fin;
+    int indexnum = 0;
+    // =================== Reading file and inserting into database ========================
 
-    int offset = 0; 
+    Record record; //declare temporary record
+    ifstream testData("data/dataSmall.tsv"); // reading from file
 
-    void *temp_rec_add = (unsigned char *)disk.diskPtr + (disk.numUsedBlocks*disk.blockSize) + offset; //set current record address
-    for(int i=0;i<2;i++)
-    {
-        if(i==0)
+    if (testData.is_open()){
+        string line,index;
+        getline(testData,line);
+        while(getline(testData,line,'\n')) // getting each line as a seperate value by specifying \n
         {
-            memcpy(temp_rec_add, &record1, sizeof(record1));
+            stringstream s(line); // converting extracted line into a stream object
+            
+            while(getline(s,index,'\t')) // getting each feature as a seperate value by specifying \t
+            {
+                if (indexnum == 0) // first value is tconst
+                {
+                    strcpy(record.tconst, index.c_str()); // store current feature in current line in temporary record
+                }
+                else if (indexnum ==1) //second value is averageRating
+                {
+                    record.averageRating=stof(index); // store current feature in current line in temporary record
+                }
+                else if(indexnum == 2) //third value is numVotes
+                {
+                    record.numVotes=stoi(index); // store current feature in current line in temporary record
+                }
+                indexnum = indexnum + 1; // move on to next feature in line
+            }
+            indexnum = 0;
+
+            disk.recordIntoBlock(record); // insert packed record into a block
         }
-        else{
-            memcpy(temp_rec_add, &record2, sizeof(record2));
-        }
-
-        offset = offset + sizeof(record1);
-        temp_rec_add = (unsigned char *)disk.diskPtr + (disk.numUsedBlocks*disk.blockSize) + offset;
-
-
         
     }
-    offset = 0;
-    void *currentrecord;
 
+     // ================================== Experiment 1 =====================================
+    int numofrecords;
+    numofrecords = disk.assignedRecordsSize / sizeof(Record);
+    cout << "Number of records in disk: " << numofrecords << endl;
+    cout << "Size of a record: " << sizeof(Record) << endl;
+    cout << "Number of records stored in a block: " << disk.blockSize/sizeof(Record) << endl;
+    cout << "Number of blocks used for storing data: " << disk.numUsedBlocks + 1 << endl; 
+
+    // ================================== Experiment 2 =====================================
+
+    // ================================== Experiment 3 =====================================
+
+    // ================================== Experiment 4 =====================================
+
+    // ================================== Experiment 5 =====================================
+
+    // ================================== Listing contents of a block =====================
+    int blocknum;
+    cout << "================= Listing contents of a block ===============" << endl;
+    cout << "Key in block number: ";
+    cin >> blocknum;
+    if (blocknum-1 <= disk.numUsedBlocks)
+    {
+        cout << "tconst of block number " << blocknum << ": " << endl;
+        void *currentrecord;
+        unsigned char *selectedblockptr;
+        selectedblockptr = (unsigned char *)disk.diskPtr + (blocknum-1)*disk.blockSize;
+        for(int i=0;i<disk.blockSize;i=i+20)
+        {
+            currentrecord = (unsigned char *)selectedblockptr+i;
+            cout << "tcosnt: " << (*((Record *)currentrecord)).tconst << endl;
+        }
+    }
+    else
+    {
+        cout << "Block does not exist" << endl;
+    }
     
-    currentrecord = (unsigned char *)disk.diskPtr+offset;
-
-    cout << "Extracted average rating: " << (*((Record *)currentrecord)).tconst << endl;
+    // ====================================================================================
     return 0;
 }
