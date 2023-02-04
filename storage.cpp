@@ -53,7 +53,7 @@ char *StorageDisk::assignBlock(int recordSize)
 
 bool StorageDisk::checkDiskSize()
 {
-  if ((this->numUsedBlocks + 1) > this-> totalBlocks)
+  if ((this->numUsedBlocks + 1) > (this-> totalBlocks)-1)
   {
     return false;
   }
