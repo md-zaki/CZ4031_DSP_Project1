@@ -77,16 +77,16 @@ int main()
     int blocknum;
     cout << "================= Listing contents of a block ===============" << endl;
     cout << "Key in block number: ";
-    cin >> blocknum;
+    cin >> blocknum; // key in block number
     if (blocknum-1 <= disk.numUsedBlocks)
     {
         cout << "tconst of block number " << blocknum << ": " << endl;
-        void *currentrecord;
-        unsigned char *selectedblockptr;
-        selectedblockptr = (unsigned char *)disk.diskPtr + (blocknum-1)*disk.blockSize;
-        for(int i=0;i<disk.blockSize;i=i+20)
+        void *currentrecord; // declare pointer for record to be listed
+        unsigned char *selectedblockptr; // declare pointer to get block pointer to be listed
+        selectedblockptr = (unsigned char *)disk.diskPtr + (blocknum-1)*disk.blockSize; // set block pointer to specified block number
+        for(int i=0;i<disk.blockSize;i=i+(sizeof(Record))) // iterate through block
         {
-            currentrecord = (unsigned char *)selectedblockptr+i;
+            currentrecord = (unsigned char *)selectedblockptr+i; // set current record (block ptr + offset)
             cout << "tcosnt: " << (*((Record *)currentrecord)).tconst << endl;
         }
     }

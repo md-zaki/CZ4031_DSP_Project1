@@ -24,9 +24,9 @@ StorageDisk::~StorageDisk() {
 
 void StorageDisk::goToNextBlock()
 {
-  this->currentBlockPtr = this->currentBlockPtr + this->blockSize;
-  this->numUsedBlocks = this->numUsedBlocks + 1;
-  this->currentBlockSizeUsed = 0;
+  this->currentBlockPtr = this->currentBlockPtr + this->blockSize; // set pointer to next block (plus blockSize)
+  this->numUsedBlocks = this->numUsedBlocks + 1; // increase number of blocks used
+  this->currentBlockSizeUsed = 0; // set current used block size to 0 due to new fresh block
 }
 
 
@@ -34,18 +34,18 @@ char *StorageDisk::assignBlock(int recordSize)
 {
   if(this->checkCurrentBlockSize(recordSize))
   {
-    return this->currentBlockPtr;
+    return this->currentBlockPtr; // if there is enough block space, return current block
   }
   else
   {
-    if(this->checkDiskSize())
+    if(this->checkDiskSize()) // if not enough block space, check disk space
     {
-      this->goToNextBlock();
-      return this->currentBlockPtr;
+      this->goToNextBlock();// if enough disk space, create a new block
+      return this->currentBlockPtr;// return new block
     }
     else
     {
-      return nullptr;
+      return nullptr;// if not enough disk space, return nullptr
     }
   }
 }
@@ -55,7 +55,7 @@ bool StorageDisk::checkDiskSize()
 {
   if ((this->numUsedBlocks + 1) > (this-> totalBlocks)-1)
   {
-    return false;
+    return false; 
   }
 
   else return true;
@@ -79,9 +79,9 @@ void StorageDisk::recordIntoBlock(Record record)
   void *tempRecAddress;
   blockToBeInserted = assignBlock(sizeof(record)); // get block that the record will be inserted into
   int offset = this->currentBlockSizeUsed; // set offset for record relative to block address
-  if (blockToBeInserted == nullptr)
+  if (blockToBeInserted == nullptr)// check if disk is full
   {
-    cout << "DISK FULL"<< endl;
+    cout << "DISK FULL"<< endl; 
     return;
   }
   tempRecAddress = (unsigned char *)blockToBeInserted + offset; // create temporary address of record (address of block + offset)
