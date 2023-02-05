@@ -38,15 +38,15 @@ int main()
             {
                 if (indexnum == 0) // first value is tconst
                 {
-                    strcpy(record.tconst, index.c_str()); // store current feature in current line in temporary record
+                    strcpy(record.tconst, index.c_str()); // store current feature in current line into temporary record
                 }
                 else if (indexnum ==1) //second value is averageRating
                 {
-                    record.averageRating=stof(index); // store current feature in current line in temporary record
+                    record.averageRating=stof(index); // store current feature in current line into temporary record
                 }
                 else if(indexnum == 2) //third value is numVotes
                 {
-                    record.numVotes=stoi(index); // store current feature in current line in temporary record
+                    record.numVotes=stoi(index); // store current feature in current line into temporary record
                 }
                 indexnum = indexnum + 1; // move on to next feature in line
             }
