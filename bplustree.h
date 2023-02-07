@@ -4,25 +4,34 @@
 #include <iostream>
 using namespace std;
 
-struct Key {
-    float value;  // Value of key
+// Structure to store key and its associated addresses
+struct Keys {
+    float key_value;
+    vector<void*> add_vect; //for duplicate keys
 };
 
 class Node {
-    bool isLeafNode;    // Whether node is a leaf node
-    int numKeys;        // No. of keys in a node
-    Key *keyArrPtr;     // Pointer to array of keys in a node
-    Node **ptrArrPtr;   // Pointer to array of pointers in a node
+public:
+    bool is_leaf; // Whether node is a leaf node
+    Keys *keys; //Pointer to keys struct
+    int size; //size of keys in the node
+    Node** children; //Pointer to array of pointers in a node
 
-    public:
-        Node();
+    Node();
 };
 
 class BPlusTree {
     Node *root;  // Pointer to root node
 
     public:
-        BPlusTree();
+
+        BPlusTree(); //constructor for B+ tree
+
+        void insert_node(float key_value, void *address); 
+
+        void remove_node(float key_value); //
+
+        void *find_node(float key_value);
 };
 
 #endif
