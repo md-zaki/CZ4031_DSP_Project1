@@ -29,9 +29,9 @@ class BPlusTree {
 
         void insert_node(float key_value, void *address); 
 
-        void remove_node(float key_value); //
+        void remove_node(float key_value); 
 
-        void *find_node(float key_value);
+        vector<void*>find_node(float key_value);
 };
 
 #endif
