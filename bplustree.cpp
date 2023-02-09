@@ -62,7 +62,7 @@ void BPlusTree::insertKey(Key key) {
         }
         else {  // Current node is full
             // Create temporary array of keys and insert new key into it
-            Key tempKeyArray[MAX_KEYS + 1];
+            Key tempKeyArray[MAX_KEYS+1];
             for (int i=0; i<MAX_KEYS; i++) {
                 tempKeyArray[i] = currentNode->keyArray[i];
             }
@@ -212,7 +212,7 @@ void BPlusTree::printTree(Node *currentNode) {
             Node *node = q.front();
             q.pop();
             for (int j=0; j<node->numKeys; j++) {
-                cout << node->keyArray[j] << " ";
+                cout << node->keyArray[j].value << " ";
             }
             for (int j=0; j<node->numKeys+1; j++) {
                 if (node->pointerArray[j] != nullptr) {
