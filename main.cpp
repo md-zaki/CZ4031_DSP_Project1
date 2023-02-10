@@ -3,7 +3,8 @@ using namespace std;
 
 #include "storage.h"
 #include "storage.cpp"
-#include "bpt.cpp"
+#include "bplustree.h"
+#include "bplustree.cpp"
 #include <iostream>
 #include <fstream>
 #include <string>
