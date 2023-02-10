@@ -1,26 +1,41 @@
-#include <climits>
-#include <fstream>
+#ifndef BPLUSTREE_H
+#define BPLUSTREE_H
+
 #include <iostream>
-#include <sstream>
 using namespace std;
 
+
+const int MAX_KEYS = 3;
+
+
+struct Key {
+    int value;  // Value of key
+};
+
+
 class Node {
-    bool is_leaf; // check if node is the lowest level
-    int *keyArray, size; // pointer to array of keys
-    Node **ptrArray; // pointer to array of pointers
-    friend class BPTree;
+    
 
     public:
-    Node(); // constructor of class node
+    bool isLeaf;  // Whether node is a leaf node
+    int numKeys;  // No. of keys in a node
+    Key *keyArray;  // Pointer to array of keys in a node
+    Node **pointerArray;  // Pointer to array of pointers in a node
+    friend class BPlusTree;
+    Node();
 };
 
-class BPTree {
-    Node *root;
+
+class BPlusTree {
+    Node *rootNode;  // Pointer to root node
 
     public:
-        BPTree();
-        void search(int);
-        void insert(int);
+        BPlusTree();
         Node *getRoot();
-
+        void insertKey(Key key);
+        void insertInternalNode(Key key, Node *parentNode, Node *childNode);
+        Node *findParentNode(Node *currentNode, Node *childNode);
+        void printTree(Node *currentNode);
 };
+
+#endif
