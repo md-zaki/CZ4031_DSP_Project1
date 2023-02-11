@@ -3,8 +3,8 @@ using namespace std;
 
 #include "storage.h"
 #include "storage.cpp"
-#include "bptree-zaki.h"
-#include "bptree-zaki.cpp"
+#include "rewrite.h"
+#include "rewrite.cpp"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -52,7 +52,7 @@ int main()
                     record.numVotes=stoi(index); // store current feature in current line into temporary record
                     Key key;
                     key.value = record.numVotes;
-                    tree.insertKey(key);
+                    tree.insertion(key);
                 }
                 indexnum = indexnum + 1; // move on to next feature in line
             }
@@ -73,7 +73,7 @@ int main()
 
     // ================================== Experiment 2 =====================================
     cout << "Printed B+ Tree" << endl;
-    tree.printTree(tree.getRoot());
+    tree.printTree(tree.rootNode);
     // ================================== Experiment 3 =====================================
 
     // ================================== Experiment 4 =====================================
