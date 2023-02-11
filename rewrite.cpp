@@ -83,7 +83,7 @@ tuple<Node*,Node*> BPlusTree::traverseNonLeaf(Node *rootNode, Key key)
         parent = currentNode;
         for(int index=0; index<(currentNode->numKeys);index++) // check root node first
         {
-            if (key.value < currentNode->keyArray[index].value) // if key to be inserted is less than key in pos i...
+            if (key.value < currentNode->keyArray[index].value) // if key to be inserted is less than key in index
             {
                 currentNode = currentNode->pointerArray[index]; // set current node to pointer in root node corresponding to key i
                 break;
