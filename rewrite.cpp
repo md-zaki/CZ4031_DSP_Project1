@@ -16,9 +16,56 @@ BPlusTree::BPlusTree() {
     rootNode = nullptr;
 }
 
-// Node *BPlusTree::getRoot() { 
-//     return rootNode; 
-// }
+//==========================================================================
+void BPlusTree::insertion(Key key, void* recAddress)
+{
+    if (rootNode == nullptr) // first insertion
+    {
+        rootNode = new Node;
+        rootNode->isLeaf = true;
+        rootNode->numKeys = rootNode->numKeys + 1;
+        rootNode->keyArray[0] = key;
+        rootNode->pointerArray[0] = (Node *)recAddress;
+    }
+    else
+    {
+        // traverse tree until find a leaf node for key
+        auto [leafNode, parentNode] = traverseNonLeaf(rootNode,key); //returns leafNode for key to be inserted into and its parent node
+        
+        // Reached leaf
+        if(leafNode->numKeys < MAX_KEYS) // if current node has space
+        {
+            insertleaf(key, leafNode, recAddress); // insert key into specified leafNode
+        }
+        else // if current node is full
+        {   
+            //create tempkeyarray
+            Key dummyKeyArray[MAX_KEYS+1];
+            createDummyKeyArray(key, leafNode, dummyKeyArray); // create dummy key array with new key inserted
+
+            // Split current node into two
+            auto[firstNode, secondNode] = splitLeafNode(dummyKeyArray,leafNode);
+
+            if (firstNode == rootNode) {
+                // If current node is root node, create new root node
+                Node *newRootNode = new Node;
+                newRootNode->keyArray[0] = firstNode->keyArray[0];
+                newRootNode->pointerArray[0] = leafNode;
+                newRootNode->pointerArray[1] = firstNode;
+                newRootNode->isLeaf = false;
+                newRootNode->numKeys = 1;
+                rootNode = newRootNode;
+            }
+            else {
+                // Insert first key of new leaf node into parent node
+                insertIntoNonLeaf(secondNode->keyArray[0], parentNode, secondNode);
+            }
+        }
+    }
+    
+
+}
+
 
 tuple<Node*,Node*> BPlusTree::traverseNonLeaf(Node *rootNode, Key key)
 {
@@ -47,7 +94,9 @@ tuple<Node*,Node*> BPlusTree::traverseNonLeaf(Node *rootNode, Key key)
     return {currentNode,parent};
 }
 
-void BPlusTree::insertleaf(Key key, Node* leafNode)
+
+
+void BPlusTree::insertleaf(Key key, Node* leafNode, void* recAddress)
 {
     // find correct postion to insert new key
     int position=0;
@@ -63,11 +112,14 @@ void BPlusTree::insertleaf(Key key, Node* leafNode)
     //insert key
     leafNode->keyArray[position] = key;
     leafNode->pointerArray[leafNode->numKeys] = leafNode->pointerArray[leafNode->numKeys-1];
-    leafNode->pointerArray[leafNode->numKeys-1] = nullptr;
-    leafNode->numKeys = leafNode->numKeys + 1; // zaki add
+    leafNode->numKeys = leafNode->numKeys + 1; 
+    leafNode->pointerArray[leafNode->numKeys-1] = (Node*)recAddress;// add address of record in leaf node
+    
 }
 
-void BPlusTree::createDummyArray(Key key, Node* leafNode, Key tempKeyArray[])
+
+
+void BPlusTree::createDummyKeyArray(Key key, Node* leafNode, Key tempKeyArray[])
 {
     // Create temporary array of keys and insert new key into it
     for (int index=0; index<MAX_KEYS; index++) {
@@ -83,54 +135,8 @@ void BPlusTree::createDummyArray(Key key, Node* leafNode, Key tempKeyArray[])
     tempKeyArray[index] = key; // insert key in temp array
 }
 
-void BPlusTree::insertion(Key key)
-{
-    if (rootNode == nullptr) // first insertion
-    {
-        rootNode = new Node;
-        rootNode->pointerArray[0] = nullptr;
-        rootNode->isLeaf = true;
-        rootNode->numKeys = rootNode->numKeys + 1;
-        rootNode->keyArray[0] = key;
-    }
-    else
-    {
-        // traverse tree until find a leaf node for key
-        auto [leafNode, parentNode] = traverseNonLeaf(rootNode,key); //returns leafNode for key to be inserted into and its parent node
-        
-        // Reached leaf
-        if(leafNode->numKeys < MAX_KEYS) // if current node has space
-        {
-            insertleaf(key, leafNode); // insert key into specified leafNode
-        }
-        else // if current node is full
-        {   
-            //create tempkeyarray
-            Key dummyKeyArray[MAX_KEYS+1];
-            createDummyArray(key, leafNode, dummyKeyArray); // create dummy key array with new key inserted
 
-            // Split current node into two
-            auto[firstNode, secondNode] = splitLeafNode(dummyKeyArray,leafNode);
 
-            if (firstNode == rootNode) {
-                // If current node is root node, create new root node
-                Node *newRootNode = new Node;
-                newRootNode->keyArray[0] = firstNode->keyArray[0];
-                newRootNode->pointerArray[0] = leafNode;
-                newRootNode->pointerArray[1] = firstNode;
-                newRootNode->isLeaf = false;
-                newRootNode->numKeys = 1;
-                rootNode = newRootNode;
-            }
-            else {
-                // Insert first key of new leaf node into parent node
-                insertIntoNonLeaf(secondNode->keyArray[0], parentNode, secondNode);
-            }
-        }
-    }
-    
-    
-}
 
 tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[], Node* leafNode)
 {
@@ -145,7 +151,6 @@ tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[], Node* leafNode)
     // Assign new pointers in pointer array to both nodes
     leafNode->pointerArray[leafNode->numKeys] = secondNode; // last pointer of leaf node point to next leaf node
     secondNode->pointerArray[secondNode->numKeys] = leafNode->pointerArray[MAX_KEYS]; // reassign last pointer to new leaf node
-    secondNode->pointerArray[0] = nullptr; // zaki add
     leafNode->pointerArray[MAX_KEYS] = nullptr;
 
     //Assign values of keys to both nodes from dummy key array
@@ -158,6 +163,7 @@ tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[], Node* leafNode)
 
     return {leafNode, secondNode};
 }
+
 
 
 
@@ -230,6 +236,9 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
     }
 }
 
+
+
+
 Node *BPlusTree::findParentNode(Node *currentNode, Node *childNode) {
     // Use DFS to find parent node
     Node *parentNode;
@@ -251,6 +260,10 @@ Node *BPlusTree::findParentNode(Node *currentNode, Node *childNode) {
     return parentNode;
 }
 
+
+
+
+
 void BPlusTree::printTree(Node *currentNode) {
     if (currentNode == nullptr) {
         return;
@@ -271,7 +284,7 @@ void BPlusTree::printTree(Node *currentNode) {
             }
             for (int j=0; j<node->numKeys+1; j++) 
             {
-                if (node->pointerArray[j] == nullptr)
+                if (node->isLeaf) // if node is leaf, break
                 {
                     break;
                 }
@@ -284,83 +297,3 @@ void BPlusTree::printTree(Node *currentNode) {
         cout << endl;
     }
 }
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-give chance please prof, xie xie */

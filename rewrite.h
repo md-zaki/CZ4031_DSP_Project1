@@ -33,13 +33,13 @@ class BPlusTree {
         Node *rootNode;  // Pointer to root node
         BPlusTree();
         Node *getRoot();
-        void insertion(Key key);
+        void insertion(Key key, void* recAddress);
         void insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode);
         Node *findParentNode(Node *currentNode, Node *childNode);
         void printTree(Node *currentNode);
         tuple<Node*,Node*> traverseNonLeaf(Node *rootNode, Key key);
-        void insertleaf(Key key, Node* leafNode);
-        void createDummyArray(Key key, Node* leafNode, Key tempKeyArray[]);
+        void insertleaf(Key key, Node* leafNode, void* recAddress);
+        void createDummyKeyArray(Key key, Node* leafNode, Key tempKeyArray[]);
         tuple<Node*,Node*> splitLeafNode(Key dummyKeyArray[], Node* leafNode);
 };
 

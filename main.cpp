@@ -50,15 +50,15 @@ int main()
                 else if(indexnum == 2) //third value is numVotes
                 {
                     record.numVotes=stoi(index); // store current feature in current line into temporary record
-                    Key key;
-                    key.value = record.numVotes;
-                    tree.insertion(key);
                 }
                 indexnum = indexnum + 1; // move on to next feature in line
             }
             indexnum = 0;
-
-            disk.recordIntoBlock(record); // insert packed record into a block
+            void *recAddress;
+            recAddress = disk.recordIntoBlock(record); // insert packed record into a block, returns record address
+            Key key;
+            key.value = record.numVotes;
+            tree.insertion(key,recAddress);
         }
         
     }
@@ -74,7 +74,19 @@ int main()
     // ================================== Experiment 2 =====================================
     cout << "Printed B+ Tree" << endl;
     tree.printTree(tree.rootNode);
+    
     // ================================== Experiment 3 =====================================
+
+    Key key;
+    key.value = 2;
+    auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, key);
+    for(int i=0; i<leafNode->numKeys;i++)
+    {
+        if((leafNode->keyArray[i].value) == key.value)
+        {
+            cout << ((Record*)(leafNode->pointerArray[i]))->tconst << endl;
+        }
+    }
 
     // ================================== Experiment 4 =====================================
 

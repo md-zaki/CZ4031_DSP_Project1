@@ -73,7 +73,7 @@ bool StorageDisk::checkCurrentBlockSize(int recordSize)
 }
 
 
-void StorageDisk::recordIntoBlock(Record record)
+void * StorageDisk::recordIntoBlock(Record record)
 {
   char *blockToBeInserted;
   void *tempRecAddress;
@@ -82,7 +82,7 @@ void StorageDisk::recordIntoBlock(Record record)
   if (blockToBeInserted == nullptr)// check if disk is full
   {
     cout << "DISK FULL"<< endl; 
-    return;
+    return nullptr;
   }
   tempRecAddress = (unsigned char *)blockToBeInserted + offset; // create temporary address of record (address of block + offset)
   
@@ -90,5 +90,6 @@ void StorageDisk::recordIntoBlock(Record record)
   this->currentBlockSizeUsed = this->currentBlockSizeUsed + sizeof(record); // increase bytes used in current block
   this->assignedRecordsSize = this->assignedRecordsSize + sizeof(record); // increase bytes used by records in disk
   // cout << "Record with key: " << record.tconst << "successfully inserted" << endl;
+  return tempRecAddress;
 }
 
