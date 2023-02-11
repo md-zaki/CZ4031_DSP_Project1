@@ -64,21 +64,32 @@ int main()
     }
 
      // ================================== Experiment 1 =====================================
-    // int numofrecords;
-    // numofrecords = disk.assignedRecordsSize / sizeof(Record);
-    // cout << "Number of records in disk: " << numofrecords << endl;
-    // cout << "Size of a record: " << sizeof(Record) << endl;
-    // cout << "Number of records stored in a block: " << disk.blockSize/sizeof(Record) << endl;
-    // cout << "Number of blocks used for storing data: " << disk.numUsedBlocks + 1 << endl; 
-
+    cout << "=========== Experiment 1 ===============" << endl;
+    int numofrecords;
+    numofrecords = disk.assignedRecordsSize / sizeof(Record);
+    cout << "Number of records in disk: " << numofrecords << endl;
+    cout << "Size of a record: " << sizeof(Record) << endl;
+    cout << "Number of records stored in a block: " << disk.blockSize/sizeof(Record) << endl;
+    cout << "Number of blocks used for storing data: " << disk.numUsedBlocks + 1 << endl; 
+    cout << endl;
     // ================================== Experiment 2 =====================================
+    cout << "============ Experiment 2 ==============" << endl;
+    cout << "Parameter n of B+ Tree: " << MAX_KEYS << endl;
+    cout << "Number of nodes in B+ Tree: " << tree.numOfNodes << endl;
+    cout << "Number of levels in B+ Tree: " << tree.numOfLevels << endl;
+    for(int i=0; i<(tree.rootNode)->numKeys;i++)
+    {
+        cout << "Content of Root Node: " << (tree.rootNode)->keyArray[i].value;
+    }
+    cout << endl;
+    
     cout << "Printed B+ Tree" << endl;
     tree.printTree(tree.rootNode);
-    
+    cout << endl;
     // ================================== Experiment 3 =====================================
-
+    cout << "============ Experiment 3 ==============" << endl;
     Key key;
-    key.value = 2;
+    key.value = 11;
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, key);
     for(int i=0; i<leafNode->numKeys;i++)
     {
@@ -87,7 +98,7 @@ int main()
             cout << ((Record*)(leafNode->pointerArray[i]))->tconst << endl;
         }
     }
-
+    cout << endl;
     // ================================== Experiment 4 =====================================
 
     // ================================== Experiment 5 =====================================

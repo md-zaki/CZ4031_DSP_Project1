@@ -31,6 +31,9 @@ class BPlusTree {
 
     public:
         Node *rootNode;  // Pointer to root node
+        int numOfNodes = 0;
+        int numOfLevels = 0;
+
         BPlusTree();
         Node *getRoot();
         void insertion(Key key, void* recAddress);
@@ -39,8 +42,8 @@ class BPlusTree {
         void printTree(Node *currentNode);
         tuple<Node*,Node*> traverseNonLeaf(Node *rootNode, Key key);
         void insertleaf(Key key, Node* leafNode, void* recAddress);
-        void createDummyKeyArray(Key key, Node* leafNode, Key tempKeyArray[]);
-        tuple<Node*,Node*> splitLeafNode(Key dummyKeyArray[], Node* leafNode);
+        void createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], Node* tempPtrArray[], void* recAddress);
+        tuple<Node*,Node*> splitLeafNode(Key dummyKeyArray[],Node* dummyPtrArray[], Node* leafNode);
 };
 
 #endif

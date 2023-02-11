@@ -26,6 +26,8 @@ void BPlusTree::insertion(Key key, void* recAddress)
         rootNode->numKeys = rootNode->numKeys + 1;
         rootNode->keyArray[0] = key;
         rootNode->pointerArray[0] = (Node *)recAddress;
+        numOfNodes++;
+        numOfLevels++;
     }
     else
     {
@@ -41,20 +43,24 @@ void BPlusTree::insertion(Key key, void* recAddress)
         {   
             //create tempkeyarray
             Key dummyKeyArray[MAX_KEYS+1];
-            createDummyKeyArray(key, leafNode, dummyKeyArray); // create dummy key array with new key inserted
+            Node * dummyPtrArray[MAX_KEYS+2];
+            createDummyArrays(key, leafNode, dummyKeyArray, dummyPtrArray, recAddress); // create dummy key array with new key inserted
 
             // Split current node into two
-            auto[firstNode, secondNode] = splitLeafNode(dummyKeyArray,leafNode);
+            auto[firstNode, secondNode] = splitLeafNode(dummyKeyArray,dummyPtrArray,leafNode);
+            numOfNodes++;
 
             if (firstNode == rootNode) {
                 // If current node is root node, create new root node
                 Node *newRootNode = new Node;
                 newRootNode->keyArray[0] = firstNode->keyArray[0];
-                newRootNode->pointerArray[0] = leafNode;
-                newRootNode->pointerArray[1] = firstNode;
+                newRootNode->pointerArray[0] = firstNode;
+                newRootNode->pointerArray[1] = secondNode;
                 newRootNode->isLeaf = false;
                 newRootNode->numKeys = 1;
                 rootNode = newRootNode;
+                numOfNodes++;
+                numOfLevels++;
             }
             else {
                 // Insert first key of new leaf node into parent node
@@ -119,11 +125,12 @@ void BPlusTree::insertleaf(Key key, Node* leafNode, void* recAddress)
 
 
 
-void BPlusTree::createDummyKeyArray(Key key, Node* leafNode, Key tempKeyArray[])
+void BPlusTree::createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], Node* tempPtrArray[], void* recAddress)
 {
     // Create temporary array of keys and insert new key into it
     for (int index=0; index<MAX_KEYS; index++) {
-        tempKeyArray[index] = leafNode->keyArray[index]; // transfer to temp array
+        tempKeyArray[index] = leafNode->keyArray[index]; // transfer keys to temp array
+        tempPtrArray[index] = leafNode->pointerArray[index];
     }
     int index = 0;
     while (key.value > tempKeyArray[index].value) {
@@ -131,14 +138,16 @@ void BPlusTree::createDummyKeyArray(Key key, Node* leafNode, Key tempKeyArray[])
     }
     for (int j=MAX_KEYS; j>index; j--) {
         tempKeyArray[j] = tempKeyArray[j-1]; // make space in temp array for key
+        tempPtrArray[j] = tempPtrArray[j-1]; // make space in temp array for ptr
     }
     tempKeyArray[index] = key; // insert key in temp array
+    tempPtrArray[index] = (Node*)recAddress;
 }
 
 
 
 
-tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[], Node* leafNode)
+tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[],Node* dummyPtrArray[], Node* leafNode)
 {
     // create second node after splitting
     Node *secondNode = new Node;
@@ -146,12 +155,21 @@ tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[], Node* leafNode)
     // split current leaf node in half
     leafNode->numKeys = (MAX_KEYS+1) / 2;
     // set second node numKeys to max keys minus current node numkeys
-    secondNode->numKeys = MAX_KEYS+1 - (leafNode->numKeys);
+    secondNode->numKeys = (MAX_KEYS+1) - (leafNode->numKeys);
 
-    // Assign new pointers in pointer array to both nodes
+    // Assign new pointers in pointer array to both nodes from dummy ptr array
+    
+    for(int i=0; i<leafNode->numKeys; i++)
+    {
+        leafNode->pointerArray[i] = dummyPtrArray[i];
+    }
+    for (int i=0, j=leafNode->numKeys; i<secondNode->numKeys; i++, j++) {
+        secondNode->pointerArray[i] = dummyPtrArray[j];
+    }
+
     leafNode->pointerArray[leafNode->numKeys] = secondNode; // last pointer of leaf node point to next leaf node
-    secondNode->pointerArray[secondNode->numKeys] = leafNode->pointerArray[MAX_KEYS]; // reassign last pointer to new leaf node
-    leafNode->pointerArray[MAX_KEYS] = nullptr;
+    secondNode->pointerArray[secondNode->numKeys] = leafNode->pointerArray[MAX_KEYS]; // second node point to next node
+
 
     //Assign values of keys to both nodes from dummy key array
     for (int i=0; i<leafNode->numKeys; i++) {
@@ -219,6 +237,7 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
             newInternalNode->pointerArray[i] = tempPointerArray[j];
         }
         newInternalNode->pointerArray[newInternalNode->numKeys] = tempPointerArray[j];
+        numOfNodes++;
 
         if (parentNode == rootNode) {
             // If parent node is root node, create new root node
@@ -229,6 +248,8 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
             newRootNode->isLeaf = false;
             newRootNode->numKeys = 1;
             rootNode = newRootNode;
+            numOfNodes++;
+            numOfLevels++;
         }
         else {
             insertIntoNonLeaf(parentNode->keyArray[parentNode->numKeys], findParentNode(rootNode, parentNode), newInternalNode);
