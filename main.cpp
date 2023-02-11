@@ -90,12 +90,16 @@ int main()
     cout << "============ Experiment 3 ==============" << endl;
     Key key;
     key.value = 11;
+    cout << "Retrieving records with numVotes = " << key.value << endl;
+
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, key);
     for(int i=0; i<leafNode->numKeys;i++)
     {
         if((leafNode->keyArray[i].value) == key.value)
         {
-            cout << ((Record*)(leafNode->pointerArray[i]))->tconst << endl;
+            cout << ((Record*)(leafNode->pointerArray[i]))->tconst << ", ";
+            cout << ((Record*)(leafNode->pointerArray[i]))->averageRating << ", ";
+            cout << ((Record*)(leafNode->pointerArray[i]))->numVotes << endl;
         }
     }
     cout << endl;
