@@ -72,6 +72,7 @@ int main()
     cout << "Number of records stored in a block: " << disk.blockSize/sizeof(Record) << endl;
     cout << "Number of blocks used for storing data: " << disk.numUsedBlocks + 1 << endl; 
     cout << endl;
+    
     // ================================== Experiment 2 =====================================
     cout << "============ Experiment 2 ==============" << endl;
     cout << "Parameter n of B+ Tree: " << MAX_KEYS << endl;
@@ -86,6 +87,7 @@ int main()
     cout << "Printed B+ Tree" << endl;
     tree.printTree(tree.rootNode);
     cout << endl;
+
     // ================================== Experiment 3 =====================================
     cout << "============ Experiment 3 ==============" << endl;
     Key key;
