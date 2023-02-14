@@ -1,6 +1,7 @@
 #include "rewrite.h"
 #include <queue>
 #include <tuple>
+#include <vector>
 using namespace std;
 
 
@@ -8,7 +9,8 @@ Node::Node() {
     isLeaf = true;
     numKeys = 0;
     keyArray = new Key[MAX_KEYS];
-    pointerArray = new Node *[MAX_KEYS+1];
+    //pointerArray = new Node *[MAX_KEYS+1];
+    pointerArray = new void* [MAX_KEYS+1];  //tim
 }
 
 
@@ -25,7 +27,8 @@ void BPlusTree::insertion(Key key, void* recAddress)
         rootNode->isLeaf = true;
         rootNode->numKeys = rootNode->numKeys + 1;
         rootNode->keyArray[0] = key;
-        rootNode->pointerArray[0] = (Node *)recAddress;
+        //rootNode->pointerArray[0] = (Node *)recAddress;
+        rootNode->pointerArray[0] = new vector<void*>;  //tim
         numOfNodes++;
         numOfLevels++;
     }
@@ -43,7 +46,8 @@ void BPlusTree::insertion(Key key, void* recAddress)
         {   
             //create tempkeyarray
             Key dummyKeyArray[MAX_KEYS+1];
-            Node * dummyPtrArray[MAX_KEYS+2];
+            //Node * dummyPtrArray[MAX_KEYS+2];
+            vector<void*>* dummyPtrArray[MAX_KEYS+2];   //tim
             createDummyArrays(key, leafNode, dummyKeyArray, dummyPtrArray, recAddress); // create dummy key array with new key inserted
 
             // Split current node into two
@@ -85,12 +89,12 @@ tuple<Node*,Node*> BPlusTree::traverseNonLeaf(Node *rootNode, Key key)
         {
             if (key.value < currentNode->keyArray[index].value) // if key to be inserted is less than key in index
             {
-                currentNode = currentNode->pointerArray[index]; // set current node to pointer in root node corresponding to key i
+                currentNode = (Node*)currentNode->pointerArray[index]; // set current node to pointer in root node corresponding to key i
                 break;
             }
             if(index == (currentNode->numKeys)-1) // if iterate until last key
             {
-                currentNode = currentNode->pointerArray[index+1]; // set current node to node pointed by last pointer
+                currentNode = (Node*)currentNode->pointerArray[index+1]; // set current node to node pointed by last pointer
                 break;
             }
         }
@@ -125,12 +129,13 @@ void BPlusTree::insertleaf(Key key, Node* leafNode, void* recAddress)
 
 
 
-void BPlusTree::createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], Node* tempPtrArray[], void* recAddress)
+//void BPlusTree::createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], Node* tempPtrArray[], void* recAddress)
+void BPlusTree::createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], vector<void*>* tempPtrArray[], void* recAddress) //tim
 {
     // Create temporary array of keys and insert new key into it
     for (int index=0; index<MAX_KEYS; index++) {
         tempKeyArray[index] = leafNode->keyArray[index]; // transfer keys to temp array
-        tempPtrArray[index] = leafNode->pointerArray[index];
+        tempPtrArray[index] = (vector<void*>*)leafNode->pointerArray[index];
     }
     int index = 0;
     while (key.value > tempKeyArray[index].value) {
@@ -141,13 +146,15 @@ void BPlusTree::createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], N
         tempPtrArray[j] = tempPtrArray[j-1]; // make space in temp array for ptr
     }
     tempKeyArray[index] = key; // insert key in temp array
-    tempPtrArray[index] = (Node*)recAddress;
+    //tempPtrArray[index] = (Node*)recAddress;
+    tempPtrArray[index] = new vector<void*>; //tim
+    tempPtrArray[index]->push_back(recAddress); //tim
 }
 
 
 
-
-tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[],Node* dummyPtrArray[], Node* leafNode)
+//tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[], node* dummyPtrArray[], Node* leafNode)
+tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[], vector<void*>* dummyPtrArray[], Node* leafNode)
 {
     // create second node after splitting
     Node *secondNode = new Node;
@@ -172,10 +179,10 @@ tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[],Node* dummyPtrAr
 
 
     //Assign values of keys to both nodes from dummy key array
-    for (int i=0; i<leafNode->numKeys; i++) {
+    for (int i=0; i<leafNode->numKeys; i++) {   //redundant loop
     leafNode->keyArray[i] = dummyKeyArray[i];
     }
-    for (int i=0, j=leafNode->numKeys; i<secondNode->numKeys; i++, j++) {
+    for (int i=0, j=leafNode->numKeys; i<secondNode->numKeys; i++, j++) {   //redundant loop
         secondNode->keyArray[i] = dummyKeyArray[j];
     }
 
@@ -208,14 +215,14 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
         // Copy keys and pointers of parent node into temporary arrays
         for (int i=0; i<MAX_KEYS; i++) {
             tempKeyArray[i] = parentNode->keyArray[i];
-            tempPointerArray[i] = parentNode->pointerArray[i];
+            tempPointerArray[i] = (Node*)parentNode->pointerArray[i];
         }
-        tempPointerArray[MAX_KEYS] = parentNode->pointerArray[MAX_KEYS];
+        tempPointerArray[MAX_KEYS] = (Node*)parentNode->pointerArray[MAX_KEYS];
 
         // Insert new key and pointer into temporary arrays
         int i = 0;
         int j;
-        while (key.value > tempKeyArray[i].value && i < MAX_KEYS) {
+        while (key.value > tempKeyArray[i].value && i < MAX_KEYS) { //could be merged with loop above
             i++;
         }
         for (j=MAX_KEYS+1; j>i; j--) {
@@ -260,10 +267,10 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
 
 
 
-Node *BPlusTree::findParentNode(Node *currentNode, Node *childNode) {
+Node *BPlusTree::findParentNode(Node *currentNode, Node *childNode) {   //could utilise key to find parent node
     // Use DFS to find parent node
     Node *parentNode;
-    if (currentNode->isLeaf || (currentNode->pointerArray[0])->isLeaf) {
+    if (currentNode->isLeaf || ((Node*)currentNode->pointerArray[0])->isLeaf) {
         return nullptr;
     }
     for (int i=0; i<currentNode->numKeys+1; i++) {
@@ -272,7 +279,7 @@ Node *BPlusTree::findParentNode(Node *currentNode, Node *childNode) {
             return parentNode;
         }
         else {
-            parentNode = findParentNode(currentNode->pointerArray[i], childNode);
+            parentNode = findParentNode((Node*)currentNode->pointerArray[i], childNode);
             if (parentNode != nullptr) {
                 return parentNode;
             }
@@ -310,7 +317,7 @@ void BPlusTree::printTree(Node *currentNode) {
                     break;
                 }
                 else if (node->pointerArray[j] != nullptr) {
-                    q.push(node->pointerArray[j]);
+                    q.push((Node*)node->pointerArray[j]);
                 }
             }
             cout << "\t";

@@ -2,6 +2,7 @@
 #define BPLUSTREE_H
 
 #include <iostream>
+#include <vector>
 using namespace std;
 
 
@@ -20,7 +21,8 @@ class Node {
     bool isLeaf;  // Whether node is a leaf node
     int numKeys;  // No. of keys in a node
     Key *keyArray;  // Pointer to array of keys in a node
-    Node **pointerArray;  // Pointer to array of pointers in a node
+    //Node **pointerArray;  // Pointer to array of pointers in a node
+    void **pointerArray;  //Tim
     friend class BPlusTree;
     Node();
 };
@@ -42,8 +44,10 @@ class BPlusTree {
         void printTree(Node *currentNode);
         tuple<Node*,Node*> traverseNonLeaf(Node *rootNode, Key key);
         void insertleaf(Key key, Node* leafNode, void* recAddress);
-        void createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], Node* tempPtrArray[], void* recAddress);
-        tuple<Node*,Node*> splitLeafNode(Key dummyKeyArray[],Node* dummyPtrArray[], Node* leafNode);
+        //void createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], node* tempPtrArray[], void* recAddress);
+        void createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], vector<void*>* tempPtrArray[], void* recAddress); //tim
+        //tuple<Node*,Node*> splitLeafNode(Key dummyKeyArray[],Node* dummyPtrArray[], Node* leafNode);
+        tuple<Node*,Node*> splitLeafNode(Key dummyKeyArray[],vector<void*>* dummyPtrArray[], Node* leafNode); //tim
 };
 
 #endif
