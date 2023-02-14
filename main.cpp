@@ -56,8 +56,7 @@ int main()
             indexnum = 0;
             void *recAddress;
             recAddress = disk.recordIntoBlock(record); // insert packed record into a block, returns record address
-            Key key;
-            key.value = record.numVotes;
+            int key = record.numVotes;
             tree.insertion(key,recAddress);
         }
         
@@ -80,7 +79,7 @@ int main()
     cout << "Number of levels in B+ Tree: " << tree.numOfLevels << endl;
     for(int i=0; i<(tree.rootNode)->numKeys;i++)
     {
-        cout << "Content of Root Node: " << (tree.rootNode)->keyArray[i].value;
+        cout << "Content of Root Node: " << (tree.rootNode)->keyArray[i];
     }
     cout << endl;
     
@@ -90,14 +89,13 @@ int main()
 
     // ================================== Experiment 3 =====================================
     cout << "============ Experiment 3 ==============" << endl;
-    Key key;
-    key.value = 11;
-    cout << "Retrieving records with numVotes = " << key.value << endl;
+    int key = 11;
+    cout << "Retrieving records with numVotes = " << key << endl;
 
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, key);
     for(int i=0; i<leafNode->numKeys;i++)
     {
-        if((leafNode->keyArray[i].value) == key.value)
+        if((leafNode->keyArray[i]) == key)
         {
             cout << ((Record*)(leafNode->pointerArray[i]))->tconst << ", ";
             cout << ((Record*)(leafNode->pointerArray[i]))->averageRating << ", ";
