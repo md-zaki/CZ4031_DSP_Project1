@@ -110,16 +110,24 @@ void BPlusTree::insertleaf(Key key, Node* leafNode, void* recAddress)
     {
         position++;
     }
-    // Make space for new key
-    for (int nodeindex=leafNode->numKeys; nodeindex>position; nodeindex--) 
+
+    if(key.value == leafNode->keyArray[position].value)
     {
-        leafNode->keyArray[nodeindex] = leafNode->keyArray[nodeindex-1]; // move all keys to make space
     }
-    //insert key
-    leafNode->keyArray[position] = key;
-    leafNode->pointerArray[leafNode->numKeys] = leafNode->pointerArray[leafNode->numKeys-1];
-    leafNode->numKeys = leafNode->numKeys + 1; 
-    leafNode->pointerArray[leafNode->numKeys-1] = (Node*)recAddress;// add address of record in leaf node
+    else
+    {
+        // Make space for new key
+        for (int nodeindex=leafNode->numKeys; nodeindex>position; nodeindex--) 
+        {
+            leafNode->keyArray[nodeindex] = leafNode->keyArray[nodeindex-1]; // move all keys to make space
+        }
+        //insert key
+        leafNode->keyArray[position] = key;
+        leafNode->pointerArray[leafNode->numKeys] = leafNode->pointerArray[leafNode->numKeys-1];
+        leafNode->numKeys = leafNode->numKeys + 1; 
+        leafNode->pointerArray[leafNode->numKeys-1] = (Node*)recAddress;// add address of record in leaf node
+    }
+    
     
 }
 
