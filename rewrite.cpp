@@ -20,36 +20,6 @@ BPlusTree::BPlusTree() {
 }
 
 //==========================================================================
-/*vector<void*> BPlusTree::find_node(float key_value){
-    if (root == NULL) { //tree is empty
-        cout << "Tree is empty\n";
-    }else{
-        Node *nodeCursor = root;
-        while (nodeCursor->is_leaf == false) {  //While the current node is not leaf node, find the appropriate pointer to the children node
-            for (int i = 0; i < nodeCursor->size; i++) {
-                if (key_value < nodeCursor->keys[i].key_value) {
-                    nodeCursor = nodeCursor->children[i];
-                    break;
-                }
-                if (i == nodeCursor->size - 1) {
-                    nodeCursor = nodeCursor->children[i + 1];
-                    break;
-                }
-            }
-        }
-        for (int i = 0; i < nodeCursor->size; i++) { //when leaf node is found, loop through the node to find the pointer to key value in "disk"
-            if (nodeCursor->keys[i].key_value == key_value) {
-                //cout << "Found\n";
-                return nodeCursor->keys[i].add_vect; //return the vector of addresses which points to the records
-            }
-        }
-        cout << "Not found\n";
-    }
-}*/
-
-bool BPlusTree::find_node(int key_value){
-    return true;
-}
 
 void BPlusTree::insertion(int key, void* recAddress)
 {
@@ -60,7 +30,8 @@ void BPlusTree::insertion(int key, void* recAddress)
         rootNode->numKeys = rootNode->numKeys + 1;
         rootNode->keyArray[0] = key;
         //rootNode->pointerArray[0] = (Node *)recAddress;
-        rootNode->pointerArray[0] = new vector<int*>;  //tim
+        rootNode->pointerArray[0] = new vector<Record*>;  //tim
+        ((vector<Record*>*)rootNode->pointerArray[0])->push_back((Record*)recAddress);
         numOfNodes++;
         numOfLevels++;
     }
@@ -79,7 +50,7 @@ void BPlusTree::insertion(int key, void* recAddress)
             //create tempkeyarray
             int dummyKeyArray[MAX_KEYS+1];
             //Node * dummyPtrArray[MAX_KEYS+2];
-            vector<int*>* dummyPtrArray[MAX_KEYS+2];   //tim
+            vector<Record*>* dummyPtrArray[MAX_KEYS+2];   //tim
             createDummyArrays(key, leafNode, dummyKeyArray, dummyPtrArray, recAddress); // create dummy key array with new key inserted
 
             // Split current node into two
@@ -144,28 +115,34 @@ void BPlusTree::insertleaf(int key, Node* leafNode, void* recAddress)
     {
         position++;
     }
+    if(leafNode->keyArray[position] == key){
+        ((vector<Record*>*)leafNode->pointerArray[position])->push_back((Record*)recAddress);
+        return;
+    }
     // Make space for new key
     for (int nodeindex=leafNode->numKeys; nodeindex>position; nodeindex--) 
     {
         leafNode->keyArray[nodeindex] = leafNode->keyArray[nodeindex-1]; // move all keys to make space
+        leafNode->pointerArray[nodeindex] = leafNode->pointerArray[nodeindex-1];
     }
     //insert key
     leafNode->keyArray[position] = key;
     leafNode->pointerArray[leafNode->numKeys] = leafNode->pointerArray[leafNode->numKeys-1];
     leafNode->numKeys = leafNode->numKeys + 1; 
-    leafNode->pointerArray[leafNode->numKeys-1] = (Node*)recAddress;// add address of record in leaf node
-    
+    //leafNode->pointerArray[leafNode->numKeys-1] = (Node*)recAddress;// add address of record in leaf node
+    leafNode->pointerArray[position] = new vector<Record*>;
+    ((vector<Record*>*)leafNode->pointerArray[position])->push_back((Record*)recAddress);
 }
 
 
 
 //void BPlusTree::createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], Node* tempPtrArray[], void* recAddress)
-void BPlusTree::createDummyArrays(int key, Node* leafNode, int tempKeyArray[], vector<int*>* tempPtrArray[], void* recAddress) //tim
+void BPlusTree::createDummyArrays(int key, Node* leafNode, int tempKeyArray[], vector<Record*>* tempPtrArray[], void* recAddress) //tim
 {
     // Create temporary array of keys and insert new key into it
     for (int index=0; index<MAX_KEYS; index++) {
         tempKeyArray[index] = leafNode->keyArray[index]; // transfer keys to temp array
-        tempPtrArray[index] = (vector<int*>*)leafNode->pointerArray[index];
+        tempPtrArray[index] = (vector<Record*>*)leafNode->pointerArray[index];
     }
     int index = 0;
     while (key > tempKeyArray[index]) {
@@ -177,14 +154,14 @@ void BPlusTree::createDummyArrays(int key, Node* leafNode, int tempKeyArray[], v
     }
     tempKeyArray[index] = key; // insert key in temp array
     //tempPtrArray[index] = (Node*)recAddress;
-    tempPtrArray[index] = new vector<int*>; //tim
-    tempPtrArray[index]->push_back((int*)recAddress); //tim
+    tempPtrArray[index] = new vector<Record*>; //tim
+    tempPtrArray[index]->push_back((Record*)recAddress); //tim
 }
 
 
 
 //tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[], node* dummyPtrArray[], Node* leafNode)
-tuple<Node*,Node*> BPlusTree::splitLeafNode(int dummyKeyArray[], vector<int*>* dummyPtrArray[], Node* leafNode)
+tuple<Node*,Node*> BPlusTree::splitLeafNode(int dummyKeyArray[], vector<Record*>* dummyPtrArray[], Node* leafNode)
 {
     // create second node after splitting
     Node *secondNode = new Node;
@@ -328,6 +305,7 @@ void BPlusTree::printTree(Node *currentNode) {
     }
 
     queue<Node *> q;
+    queue<vector<Record*>*> recordq;
     q.push(currentNode); // push current node into queue
     while (!q.empty()) // while queue not empty
     {
@@ -343,8 +321,15 @@ void BPlusTree::printTree(Node *currentNode) {
             for (int j=0; j<node->numKeys+1; j++) 
             {
                 if (node->isLeaf) // if node is leaf, break
-                {
-                    break;
+                {   
+                    // for(int i=0; i<((vector<Record*>*)node->pointerArray[j])->size(); i++ ){
+                    //     cout << (((vector<Record*>*)node->pointerArray[j])->at(0))->numVotes;
+                    // }  
+                    if(j == node->numKeys){
+                        break;
+                    }
+                    recordq.push((vector<Record*>*)node->pointerArray[j]);
+                    //break;
                 }
                 else if (node->pointerArray[j] != nullptr) {
                     q.push((Node*)node->pointerArray[j]);
@@ -353,5 +338,20 @@ void BPlusTree::printTree(Node *currentNode) {
             cout << "\t";
         }
         cout << endl;
+    }
+
+    while(!recordq.empty()){
+        int recordqueueSize = recordq.size();
+        for (int i=0; i<recordqueueSize; i++) // iterate through queue
+        {
+            vector<Record*> *index_block = recordq.front(); // get the first node in queue
+            recordq.pop(); // remove first node in queue
+
+            for (int j=0; j<index_block->size() ; j++) 
+            {
+                cout << index_block->at(j)->tconst << " " << index_block->at(j)->averageRating << " " << index_block->at(j)->numVotes << endl; // print all keys in current node
+            }
+            //cout << "\t";
+        }
     }
 }

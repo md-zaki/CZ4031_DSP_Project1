@@ -41,10 +41,9 @@ class BPlusTree {
         tuple<Node*,Node*> traverseNonLeaf(Node *rootNode, int key);
         void insertleaf(int key, Node* leafNode, void* recAddress);
         //void createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], node* tempPtrArray[], void* recAddress);
-        void createDummyArrays(int key, Node* leafNode, int tempKeyArray[], vector<int*>* tempPtrArray[], void* recAddress); //tim
+        void createDummyArrays(int key, Node* leafNode, int tempKeyArray[], vector<Record*>* tempPtrArray[], void* recAddress); //tim
         //tuple<Node*,Node*> splitLeafNode(Key dummyKeyArray[],Node* dummyPtrArray[], Node* leafNode);
-        tuple<Node*,Node*> splitLeafNode(int dummyKeyArray[],vector<int*>* dummyPtrArray[], Node* leafNode); //tim
-        bool find_node(int key_value);
+        tuple<Node*,Node*> splitLeafNode(int dummyKeyArray[],vector<Record*>* dummyPtrArray[], Node* leafNode); //tim
 };
 
 #endif
