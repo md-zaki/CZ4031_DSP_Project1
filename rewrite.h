@@ -7,6 +7,7 @@ using namespace std;
 
 
 const int MAX_KEYS = 3;
+const int MAX_ADDRESSES = 5;
 
 
 class Node {
@@ -26,7 +27,7 @@ class Node {
 class DataAddressList{
     public:
     int size;
-    Record* addressList[5];
+    Record* addressList[MAX_ADDRESSES];
     DataAddressList* nextList;
     DataAddressList();
 };
@@ -46,11 +47,9 @@ class BPlusTree {
         Node *findParentNode(Node *currentNode, Node *childNode);
         void printTree(Node *currentNode);
         tuple<Node*,Node*> traverseNonLeaf(Node *rootNode, int key);
-        void insertleaf(int key, Node* leafNode, void* recAddress);
-        //void createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], node* tempPtrArray[], void* recAddress);
-        void createDummyArrays(int key, Node* leafNode, int tempKeyArray[], DataAddressList* tempPtrArray[], void* recAddress); //tim
-        //tuple<Node*,Node*> splitLeafNode(Key dummyKeyArray[],Node* dummyPtrArray[], Node* leafNode);
-        tuple<Node*,Node*> splitLeafNode(int dummyKeyArray[],DataAddressList* dummyPtrArray[], Node* leafNode); //tim
+        void insertleaf(int key, Node* leafNode, void* recAddress, int position);
+        void createDummyArrays(int key, Node* leafNode, int tempKeyArray[], DataAddressList* tempPtrArray[], void* recAddress);
+        tuple<Node*,Node*> splitLeafNode(int dummyKeyArray[],DataAddressList* dummyPtrArray[], Node* leafNode);
 };
 
 #endif

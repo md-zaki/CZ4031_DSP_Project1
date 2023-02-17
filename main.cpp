@@ -93,20 +93,21 @@ int main()
     cout << "Retrieving records with numVotes = " << key << endl;
 
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, key);
-    vector<Record*>* leafNodeVector;
+    DataAddressList* leafNodeAddressList;
     for(int i=0; i<leafNode->numKeys;i++)
     {
         if((leafNode->keyArray[i]) == key)
         {
-            leafNodeVector = (vector<Record*>*)leafNode->pointerArray[i];
-            for(int j = 0; j < leafNodeVector->size(); j++){
-                cout << leafNodeVector->at(j)->tconst << ", ";
-                cout << leafNodeVector->at(j)->averageRating << ", ";
-                cout << leafNodeVector->at(j)->numVotes << endl;
+            leafNodeAddressList = (DataAddressList*)leafNode->pointerArray[i];
+            while(true){
+                for(int j = 0; j < leafNodeAddressList->size; j++){
+                    cout << leafNodeAddressList->addressList[j]->tconst << ", ";
+                    cout << leafNodeAddressList->addressList[j]->averageRating << ", ";
+                    cout << leafNodeAddressList->addressList[j]->numVotes << endl;
+                }
+                if(leafNodeAddressList->nextList == NULL) break;
+                leafNodeAddressList = leafNodeAddressList->nextList;
             }
-            // cout << ((Record*)(leafNode->pointerArray[i]))->tconst << ", ";
-            // cout << ((Record*)(leafNode->pointerArray[i]))->averageRating << ", ";
-            // cout << ((Record*)(leafNode->pointerArray[i]))->numVotes << endl;
         }
     }
     cout << endl;
