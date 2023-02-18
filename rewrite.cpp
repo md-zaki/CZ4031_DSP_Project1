@@ -1,4 +1,5 @@
 #include "rewrite.h"
+#include "storage.h"
 #include <queue>
 #include <tuple>
 using namespace std;
@@ -8,7 +9,12 @@ Node::Node() {
     isLeaf = true;
     numKeys = 0;
     keyArray = new Key[MAX_KEYS];
-    pointerArray = new Node *[MAX_KEYS+1];
+    pointerArray = new void *[MAX_KEYS+1];
+}
+
+DataAddressList::DataAddressList(){
+    size = 0;
+    nextList = NULL;
 }
 
 
@@ -25,7 +31,9 @@ void BPlusTree::insertion(Key key, void* recAddress)
         rootNode->isLeaf = true;
         rootNode->numKeys = rootNode->numKeys + 1;
         rootNode->keyArray[0] = key;
-        rootNode->pointerArray[0] = (Node *)recAddress;
+        rootNode->pointerArray[0] = new DataAddressList;
+        ((DataAddressList*)rootNode->pointerArray[0])->addressList[0] = (Record*)recAddress;
+        ((DataAddressList*)rootNode->pointerArray[0])->size++;
         numOfNodes++;
         numOfLevels++;
     }
@@ -34,16 +42,28 @@ void BPlusTree::insertion(Key key, void* recAddress)
         // traverse tree until find a leaf node for key
         auto [leafNode, parentNode] = traverseNonLeaf(rootNode,key); //returns leafNode for key to be inserted into and its parent node
         
-        // Reached leaf
-        if(leafNode->numKeys < MAX_KEYS) // if current node has space
+        //check if key exists and retrieve the position to insert to leaf node
+        //ADDED BY TIM
+        bool exist = false;
+        int position=0;
+        while(key.value > leafNode->keyArray[position].value && position < leafNode->numKeys)
         {
-            insertleaf(key, leafNode, recAddress); // insert key into specified leafNode
+            position++;
+        }
+        if(leafNode->keyArray[position].value == key.value){
+            exist = true;
+        }
+
+        // Reached leaf
+        if(leafNode->numKeys < MAX_KEYS || exist) // if current node has space
+        {
+            insertleaf(key, leafNode, recAddress, position); // insert key into specified leafNode
         }
         else // if current node is full
         {   
             //create tempkeyarray
             Key dummyKeyArray[MAX_KEYS+1];
-            Node * dummyPtrArray[MAX_KEYS+2];
+            DataAddressList * dummyPtrArray[MAX_KEYS+2];
             createDummyArrays(key, leafNode, dummyKeyArray, dummyPtrArray, recAddress); // create dummy key array with new key inserted
 
             // Split current node into two
@@ -53,7 +73,7 @@ void BPlusTree::insertion(Key key, void* recAddress)
             if (firstNode == rootNode) {
                 // If current node is root node, create new root node
                 Node *newRootNode = new Node;
-                newRootNode->keyArray[0] = firstNode->keyArray[0];
+                newRootNode->keyArray[0] = secondNode->keyArray[0];
                 newRootNode->pointerArray[0] = firstNode;
                 newRootNode->pointerArray[1] = secondNode;
                 newRootNode->isLeaf = false;
@@ -85,12 +105,12 @@ tuple<Node*,Node*> BPlusTree::traverseNonLeaf(Node *rootNode, Key key)
         {
             if (key.value < currentNode->keyArray[index].value) // if key to be inserted is less than key in index
             {
-                currentNode = currentNode->pointerArray[index]; // set current node to pointer in root node corresponding to key i
+                currentNode = (Node*)currentNode->pointerArray[index]; // set current node to pointer in root node corresponding to key i
                 break;
             }
             if(index == (currentNode->numKeys)-1) // if iterate until last key
             {
-                currentNode = currentNode->pointerArray[index+1]; // set current node to node pointed by last pointer
+                currentNode = (Node*)currentNode->pointerArray[index+1]; // set current node to node pointed by last pointer
                 break;
             }
         }
@@ -102,60 +122,87 @@ tuple<Node*,Node*> BPlusTree::traverseNonLeaf(Node *rootNode, Key key)
 
 
 
-void BPlusTree::insertleaf(Key key, Node* leafNode, void* recAddress)
+void BPlusTree::insertleaf(Key key, Node* leafNode, void* recAddress, int position)
 {
     // find correct postion to insert new key
-    int position=0;
-    while(key.value > leafNode->keyArray[position].value && position < leafNode->numKeys)
-    {
-        position++;
-    }
+    // int position=0;
+    // while(key.value > leafNode->keyArray[position].value && position < leafNode->numKeys)
+    // {
+    //     position++;
+    // }
 
-    if(key.value == leafNode->keyArray[position].value)
-    {
-    }
-    else
-    {
-        // Make space for new key
-        for (int nodeindex=leafNode->numKeys; nodeindex>position; nodeindex--) 
-        {
-            leafNode->keyArray[nodeindex] = leafNode->keyArray[nodeindex-1]; // move all keys to make space
+    // if(key.value == leafNode->keyArray[position].value)
+    // {
+    // }
+    // else
+    // {
+
+    if(leafNode->keyArray[position].value == key.value){    //if key already exist, then add the record address to the addressList
+        DataAddressList* cursor = (DataAddressList*)leafNode->pointerArray[position];
+        while(cursor->nextList != NULL){    //perform while loop to point to the last addressList
+            cursor = cursor->nextList;
         }
-        //insert key
-        leafNode->keyArray[position] = key;
-        leafNode->pointerArray[leafNode->numKeys] = leafNode->pointerArray[leafNode->numKeys-1];
-        leafNode->numKeys = leafNode->numKeys + 1; 
-        leafNode->pointerArray[leafNode->numKeys-1] = (Node*)recAddress;// add address of record in leaf node
+        if(cursor->size == MAX_ADDRESSES){  //if the addressList is full, create new addressList and insert new record
+            cursor->nextList = new DataAddressList;
+            DataAddressList* newList = cursor->nextList;
+            newList->addressList[0] = (Record*)recAddress;
+            newList->size++;
+        }else{  //else insert record directly into addressList
+            cursor->addressList[cursor->size] = (Record*)recAddress;
+            cursor->size++;
+        }
+        
+        return;
     }
+    // Make space for new key
+    for (int nodeindex=leafNode->numKeys; nodeindex>position; nodeindex--) 
+    {
+        leafNode->keyArray[nodeindex] = leafNode->keyArray[nodeindex-1]; // move all keys to make space
+        leafNode->pointerArray[nodeindex] = leafNode->pointerArray[nodeindex-1];
+    }
+    //insert key
+    leafNode->keyArray[position] = key;
+    leafNode->pointerArray[leafNode->numKeys] = leafNode->pointerArray[leafNode->numKeys-1];
+    leafNode->numKeys = leafNode->numKeys + 1; 
+    leafNode->pointerArray[position] = new DataAddressList;
+    ((DataAddressList*)leafNode->pointerArray[position])->addressList[0] = (Record*)recAddress;
+    ((DataAddressList*)leafNode->pointerArray[position])->size++;
+    // }
     
     
 }
 
 
 
-void BPlusTree::createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], Node* tempPtrArray[], void* recAddress)
+void BPlusTree::createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], DataAddressList* tempPtrArray[], void* recAddress)
 {
     // Create temporary array of keys and insert new key into it
     for (int index=0; index<MAX_KEYS; index++) {
         tempKeyArray[index] = leafNode->keyArray[index]; // transfer keys to temp array
-        tempPtrArray[index] = leafNode->pointerArray[index];
+        tempPtrArray[index] = (DataAddressList*)leafNode->pointerArray[index];
     }
     int index = 0;
     while (key.value > tempKeyArray[index].value) {
         index++; // find postion to insert key in temp array
+        if(index == MAX_KEYS)
+        {
+            break;
+        }
     }
     for (int j=MAX_KEYS; j>index; j--) {
         tempKeyArray[j] = tempKeyArray[j-1]; // make space in temp array for key
         tempPtrArray[j] = tempPtrArray[j-1]; // make space in temp array for ptr
     }
     tempKeyArray[index] = key; // insert key in temp array
-    tempPtrArray[index] = (Node*)recAddress;
+    tempPtrArray[index] = new DataAddressList;
+    tempPtrArray[index]->addressList[0] = (Record*)recAddress;
+    tempPtrArray[index]->size++;
 }
 
 
 
 
-tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[],Node* dummyPtrArray[], Node* leafNode)
+tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[],DataAddressList* dummyPtrArray[], Node* leafNode)
 {
     // create second node after splitting
     Node *secondNode = new Node;
@@ -196,9 +243,14 @@ tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[],Node* dummyPtrAr
 void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
     if (parentNode->numKeys < MAX_KEYS) {
         // If parent node is not full, insert new key into it
+        
         int i = 0;
         while (key.value > parentNode->keyArray[i].value && i < parentNode->numKeys) {
             i++;
+            if(i == parentNode->numKeys)
+            {
+                break;
+            }
         }
         for (int j=parentNode->numKeys; j>i; j--) {
             parentNode->keyArray[j] = parentNode->keyArray[j-1];
@@ -216,9 +268,9 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
         // Copy keys and pointers of parent node into temporary arrays
         for (int i=0; i<MAX_KEYS; i++) {
             tempKeyArray[i] = parentNode->keyArray[i];
-            tempPointerArray[i] = parentNode->pointerArray[i];
+            tempPointerArray[i] = (Node*)parentNode->pointerArray[i];
         }
-        tempPointerArray[MAX_KEYS] = parentNode->pointerArray[MAX_KEYS];
+        tempPointerArray[MAX_KEYS] = (Node*)parentNode->pointerArray[MAX_KEYS];
 
         // Insert new key and pointer into temporary arrays
         int i = 0;
@@ -234,6 +286,12 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
             tempPointerArray[j] = tempPointerArray[j-1];
         }
         tempPointerArray[i+1] = childNode;
+
+        // cout << "tempkeyarray" <<endl;
+        // for(int z=0; z<MAX_KEYS+1;z++)
+        // {
+        //     cout << tempKeyArray[z].value << endl;
+        // }
 
         // Split parent node into two
         Node *newInternalNode = new Node;
@@ -260,7 +318,7 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
             numOfLevels++;
         }
         else {
-            insertIntoNonLeaf(parentNode->keyArray[parentNode->numKeys], findParentNode(rootNode, parentNode), newInternalNode);
+            insertIntoNonLeaf(key, findParentNode(rootNode, parentNode), newInternalNode);
         }
     }
 }
@@ -271,7 +329,7 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
 Node *BPlusTree::findParentNode(Node *currentNode, Node *childNode) {
     // Use DFS to find parent node
     Node *parentNode;
-    if (currentNode->isLeaf || (currentNode->pointerArray[0])->isLeaf) {
+    if (currentNode->isLeaf || ((Node*)currentNode->pointerArray[0])->isLeaf) {
         return nullptr;
     }
     for (int i=0; i<currentNode->numKeys+1; i++) {
@@ -280,7 +338,7 @@ Node *BPlusTree::findParentNode(Node *currentNode, Node *childNode) {
             return parentNode;
         }
         else {
-            parentNode = findParentNode(currentNode->pointerArray[i], childNode);
+            parentNode = findParentNode((Node*)currentNode->pointerArray[i], childNode);
             if (parentNode != nullptr) {
                 return parentNode;
             }
@@ -299,6 +357,8 @@ void BPlusTree::printTree(Node *currentNode) {
     }
 
     queue<Node *> q;
+    bool found_first_leaf = false;
+    Node* first_leaf_node;
     q.push(currentNode); // push current node into queue
     while (!q.empty()) // while queue not empty
     {
@@ -315,14 +375,46 @@ void BPlusTree::printTree(Node *currentNode) {
             {
                 if (node->isLeaf) // if node is leaf, break
                 {
+                    // if(!found_first_leaf){ 
+                    //     found_first_leaf = true;
+                    //     first_leaf_node = node; //Assign first leaf node, TIM ADDED THIS TO PRINT LINKED ADDRESSLIST
+                    // }
                     break;
                 }
                 else if (node->pointerArray[j] != nullptr) {
-                    q.push(node->pointerArray[j]);
+                    q.push((Node*)node->pointerArray[j]);
                 }
             }
             cout << "\t";
         }
         cout << endl;
     }
+    //TIM ADDED THIS CHUNK BELOW FOR PRINTING THE LINKED ADDRESSLIST
+    // DataAddressList* addressList_cursor; 
+    // Node* next_node;
+    // while(true){    //keep looping through leaf nodes
+    //     next_node = (Node*)first_leaf_node->pointerArray[first_leaf_node->numKeys];
+
+    //     for(int i=0; i<first_leaf_node->numKeys; i++){  //loop through the each keys in the leaf node
+    //         addressList_cursor = (DataAddressList*) first_leaf_node->pointerArray[i];
+            
+    //         while(true){    // loop through the addressList for each key
+    //             for(int j=0; j<addressList_cursor->size; j++){
+    //                 cout << addressList_cursor->addressList[j]->tconst << " ";
+    //                 cout << addressList_cursor->addressList[j]->averageRating << " ";
+    //                 cout << addressList_cursor->addressList[j]->numVotes << endl;
+    //             }
+    //             if(addressList_cursor->nextList == NULL){   //end of linked addressList
+    //                 break;
+    //             }
+    //             addressList_cursor = addressList_cursor->nextList;
+    //         }   
+    //     }
+
+    //     if(next_node == NULL){
+    //         break;
+    //     }
+    //     first_leaf_node = next_node;
+    //     cout << endl;
+    // }
 }

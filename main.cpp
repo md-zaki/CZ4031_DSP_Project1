@@ -33,7 +33,7 @@ int main()
     // =================== Reading file and inserting into database ========================
 
     Record record; //declare temporary record
-    ifstream testData("data/data20.tsv"); // reading from file
+    ifstream testData("data/dataSmall.tsv"); // reading from file
     int count = 0;
 
     if (testData.is_open()){
@@ -91,13 +91,13 @@ int main()
     }
     cout << endl;
     
-    // cout << "Printed B+ Tree (not needed for final submission)" << endl;
-    // tree.printTree(tree.rootNode);
+    cout << "Printed B+ Tree (not needed for final submission)" << endl;
+    tree.printTree(tree.rootNode);
     cout << endl;
 
     // ================================== Experiment 3 =====================================
     cout << "============ Experiment 3 ==============" << endl;
-    searchTreeSingle(11, tree, disk);
+    searchTreeSingle(13, tree, disk);
     cout << endl;
     // ================================== Experiment 4 =====================================
     cout << "============ Experiment 4 ==============" << endl;
@@ -133,6 +133,7 @@ int main()
 
 void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk)
 {
+    DataAddressList* addressList_cursor;
     Key keyStruct;
     keyStruct.value = key;
     float totalAvg = 0;
@@ -140,17 +141,28 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk)
     clock_t start, end;
     clock_t startLinear, endLinear;
     start = clock();
-    cout << "Retrieving records with numVotes = " << keyStruct.value << endl;
+    cout << "RETRIEVAL USING BPLUSTREE:" << endl;
+    cout << "Key: numVotes = " << keyStruct.value << endl;
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, keyStruct);
     for(int i=0; i<leafNode->numKeys;i++)
     {
         if((leafNode->keyArray[i].value) == key)
         {
-            cout << "tconst: " << ((Record*)(leafNode->pointerArray[i]))->tconst << ", ";
-            cout << "avgRating: " << ((Record*)(leafNode->pointerArray[i]))->averageRating << ", ";
-            cout << "numVotes: " << ((Record*)(leafNode->pointerArray[i]))->numVotes << endl;
-            totalAvg = totalAvg + (float)((Record*)(leafNode->pointerArray[i]))->averageRating;
-            numOfRecords++;
+            addressList_cursor = (DataAddressList*) leafNode->pointerArray[i];
+            while(true){    // loop through the addressList for each key
+                for(int j=0; j<addressList_cursor->size; j++){
+                    cout << "tconst: " << addressList_cursor->addressList[j]->tconst << " ";
+                    cout << "avgRating: " << addressList_cursor->addressList[j]->averageRating << " ";
+                    cout << "numVotes: " << addressList_cursor->addressList[j]->numVotes << endl;
+                    totalAvg = totalAvg + (float)(addressList_cursor->addressList[j]->averageRating);
+                    numOfRecords++;
+
+                }
+                if(addressList_cursor->nextList == NULL){   //end of linked addressList
+                    break;
+                }
+                addressList_cursor = addressList_cursor->nextList;
+            }
         }
     }
     end = clock();
@@ -177,7 +189,10 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk)
 void searchStorageSingle(int key, StorageDisk disk)
 {
     cout << endl;
-    cout << "Brute Force Linear Scan searching for numVotes = " << key << endl;
+    cout << "RETRIEVAL USING LINEAR SEARCH:" << endl;
+    cout << " Key: numVotes = " << key << endl;
+    float totalAvg = 0;
+    int numOfRecords = 0;
     int numofblocks=0;
     for(int i = 0; i <= disk.numUsedBlocks; i++)
     {
@@ -192,6 +207,8 @@ void searchStorageSingle(int key, StorageDisk disk)
                 cout << "tcosnt: " << (*((Record *)currentrecord)).tconst << ", ";
                 cout << "avgRating: " << (*((Record *)currentrecord)).averageRating << ", ";
                 cout << "numVotes: " << (*((Record *)currentrecord)).numVotes << endl;
+                totalAvg = totalAvg + (*((Record *)currentrecord)).averageRating;
+                numOfRecords++;
             }
             
         }
@@ -199,6 +216,9 @@ void searchStorageSingle(int key, StorageDisk disk)
     }
 
     cout << "Number of data blocks accessed: " << numofblocks << endl;
+    float avgAll;
+    avgAll = (float)(totalAvg/(float)(numOfRecords));
+    cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
 
 }
 void searchTreeRange(int key)
