@@ -10,7 +10,7 @@ Node::Node() {
     isLeaf = true;
     numKeys = 0;
     keyArray = new Key[MAX_KEYS];
-    pointerArray = new void *[MAX_KEYS+1];
+    pointerArray = new void *[MAX_KEYS+1]();
 }
 
 DataAddressList::DataAddressList(){
@@ -156,6 +156,7 @@ void BPlusTree::insertleaf(Key key, Node* leafNode, void* recAddress, int positi
         return;
     }
     // Make space for new key
+    leafNode->pointerArray[leafNode->numKeys+1] = leafNode->pointerArray[leafNode->numKeys];
     for (int nodeindex=leafNode->numKeys; nodeindex>position; nodeindex--) 
     {
         leafNode->keyArray[nodeindex] = leafNode->keyArray[nodeindex-1]; // move all keys to make space
@@ -163,13 +164,10 @@ void BPlusTree::insertleaf(Key key, Node* leafNode, void* recAddress, int positi
     }
     //insert key
     leafNode->keyArray[position] = key;
-    leafNode->pointerArray[leafNode->numKeys] = leafNode->pointerArray[leafNode->numKeys-1];
     leafNode->numKeys = leafNode->numKeys + 1; 
     leafNode->pointerArray[position] = new DataAddressList;
     ((DataAddressList*)leafNode->pointerArray[position])->addressList[0] = (Record*)recAddress;
     ((DataAddressList*)leafNode->pointerArray[position])->size++;
-    // }
-    
     
 }
 
@@ -214,7 +212,7 @@ tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[],DataAddressList*
     // split current leaf node in half
     leafNode->numKeys = ceil(float((MAX_KEYS+1)) / 2.0);
     // set second node numKeys to max keys minus current node numkeys
-    secondNode->numKeys = floor(float((MAX_KEYS+1)) / 2.0);//(MAX_KEYS+1) - (leafNode->numKeys);
+    secondNode->numKeys = floor(float((MAX_KEYS+1)) / 2.0);
 
     // Assign new pointers in pointer array to both nodes from dummy ptr array
     
@@ -228,7 +226,6 @@ tuple<Node*,Node*> BPlusTree::splitLeafNode(Key dummyKeyArray[],DataAddressList*
 
     leafNode->pointerArray[leafNode->numKeys] = secondNode; // last pointer of leaf node point to next leaf node
     secondNode->pointerArray[secondNode->numKeys] = leafNode->pointerArray[MAX_KEYS]; // second node point to next node
-
 
     //Assign values of keys to both nodes from dummy key array
     for (int i=0; i<leafNode->numKeys; i++) {
@@ -291,11 +288,6 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
         }
         tempPointerArray[i+1] = childNode;
 
-        // cout << "TIM TESTING NON LEAF" << endl;
-        // for(int x = 0; x<MAX_KEYS+1; x++){
-        //     cout << tempKeyArray[x].value << endl;
-        // }
-
         // cout << "tempkeyarray" <<endl;
         // for(int z=0; z<MAX_KEYS+1;z++)
         // {
@@ -306,12 +298,9 @@ void BPlusTree::insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode) {
         Node *newInternalNode = new Node;
         newInternalNode->isLeaf = false;
         parentNode->numKeys = ceil((float(MAX_KEYS)) / 2.0);
-        newInternalNode->numKeys = floor(float((MAX_KEYS)) / 2.0);//MAX_KEYS - ceil((MAX_KEYS)/2);
+        newInternalNode->numKeys = floor(float((MAX_KEYS)) / 2.0);
         
         Key keyForParent = tempKeyArray[parentNode->numKeys];
-        // cout<< "key for parent " << keyForParent.value << endl;
-        // cout<< "numer of keys for parentNode " << parentNode->numKeys << endl;
-        // cout<< "numer of keys for newinternalNode " << newInternalNode->numKeys << endl;
 
         for (i=0, j=parentNode->numKeys+1; i<newInternalNode->numKeys; i++, j++) {
             newInternalNode->keyArray[i] = tempKeyArray[j];
@@ -397,10 +386,10 @@ void BPlusTree::printTree(Node *currentNode) {
             {
                 if (node->isLeaf) // if node is leaf, break
                 {
-                    // if(!found_first_leaf){ 
-                    //     found_first_leaf = true;
-                    //     first_leaf_node = node; //Assign first leaf node, TIM ADDED THIS TO PRINT LINKED ADDRESSLIST
-                    // }
+                    if(!found_first_leaf){ 
+                        found_first_leaf = true;
+                        first_leaf_node = node; //Assign first leaf node, TIM ADDED THIS TO PRINT LINKED ADDRESSLIST
+                    }
                     break;
                 }
                 else if (node->pointerArray[j] != nullptr) {
@@ -412,31 +401,31 @@ void BPlusTree::printTree(Node *currentNode) {
         cout << endl;
     }
     //TIM ADDED THIS CHUNK BELOW FOR PRINTING THE LINKED ADDRESSLIST
-    // DataAddressList* addressList_cursor; 
-    // Node* next_node;
-    // while(true){    //keep looping through leaf nodes
-    //     next_node = (Node*)first_leaf_node->pointerArray[first_leaf_node->numKeys];
+    DataAddressList* addressList_cursor; 
+    Node* next_node;
+    while(true){    //keep looping through leaf nodes
+        next_node = (Node*)first_leaf_node->pointerArray[first_leaf_node->numKeys];
 
-    //     for(int i=0; i<first_leaf_node->numKeys; i++){  //loop through the each keys in the leaf node
-    //         addressList_cursor = (DataAddressList*) first_leaf_node->pointerArray[i];
-            
-    //         while(true){    // loop through the addressList for each key
-    //             for(int j=0; j<addressList_cursor->size; j++){
-    //                 cout << addressList_cursor->addressList[j]->tconst << " ";
-    //                 cout << addressList_cursor->addressList[j]->averageRating << " ";
-    //                 cout << addressList_cursor->addressList[j]->numVotes << endl;
-    //             }
-    //             if(addressList_cursor->nextList == NULL){   //end of linked addressList
-    //                 break;
-    //             }
-    //             addressList_cursor = addressList_cursor->nextList;
-    //         }   
-    //     }
+        for(int i=0; i<first_leaf_node->numKeys; i++){  //loop through the each keys in the leaf node
+            addressList_cursor = (DataAddressList*) first_leaf_node->pointerArray[i];
+            //cout << "--------KEY IS " << first_leaf_node->keyArray[i].value << "----------" << endl;
+            while(true){    // loop through the addressList for each key
+                for(int j=0; j<addressList_cursor->size; j++){
+                    cout << addressList_cursor->addressList[j]->tconst << " ";
+                    cout << addressList_cursor->addressList[j]->averageRating << " ";
+                    cout << addressList_cursor->addressList[j]->numVotes << endl;
+                }
+                if(addressList_cursor->nextList == NULL){   //end of linked addressList
+                    break;
+                }
+                addressList_cursor = addressList_cursor->nextList;
+            }   
+        }
 
-    //     if(next_node == NULL){
-    //         break;
-    //     }
-    //     first_leaf_node = next_node;
-    //     cout << endl;
-    // }
+        if(next_node == NULL){
+            break;
+        }
+        first_leaf_node = next_node;
+        cout << endl;
+    }
 }
