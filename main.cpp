@@ -33,7 +33,7 @@ int main()
     // =================== Reading file and inserting into database ========================
 
     Record record; //declare temporary record
-    ifstream testData("data/dataSmall.tsv"); // reading from file
+    ifstream testData("data/data500.tsv"); // reading from file
     int count = 0;
 
     if (testData.is_open()){
