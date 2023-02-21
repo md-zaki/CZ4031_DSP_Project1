@@ -9,18 +9,13 @@ const int MAX_KEYS = 10;
 const int MAX_ADDRESSES = 5;
 
 
-struct Key {
-    int value;  // Value of key
-};
-
-
 class Node {
     
 
     public:
     bool isLeaf;  // Whether node is a leaf node
     int numKeys;  // No. of keys in a node
-    Key *keyArray;  // Pointer to array of keys in a node
+    int *keyArray;  // Pointer to array of keys in a node
     void **pointerArray;  // Pointer to array of pointers in a node
     friend class BPlusTree;
     Node();
@@ -44,14 +39,14 @@ class BPlusTree {
 
         BPlusTree();
         Node *getRoot();
-        void insertion(Key key, void* recAddress);
-        void insertIntoNonLeaf(Key key, Node *parentNode, Node *childNode);
+        void insertion(int key, void* recAddress);
+        void insertIntoNonLeaf(int key, Node *parentNode, Node *childNode);
         Node *findParentNode(Node *currentNode, Node *childNode);
         void printTree(Node *currentNode);
-        tuple<Node*,Node*> traverseNonLeaf(Node *rootNode, Key key);
-        void insertleaf(Key key, Node* leafNode, void* recAddress, int position);
-        void createDummyArrays(Key key, Node* leafNode, Key tempKeyArray[], DataAddressList* tempPtrArray[], void* recAddress);
-        tuple<Node*,Node*> splitLeafNode(Key dummyKeyArray[],DataAddressList* dummyPtrArray[], Node* leafNode);
+        tuple<Node*,Node*> traverseNonLeaf(Node *rootNode, int key);
+        void insertleaf(int key, Node* leafNode, void* recAddress, int position);
+        void createDummyArrays(int key, Node* leafNode, int tempKeyArray[], DataAddressList* tempPtrArray[], void* recAddress);
+        tuple<Node*,Node*> splitLeafNode(int dummyKeyArray[],DataAddressList* dummyPtrArray[], Node* leafNode);
 };
 
 #endif

@@ -62,8 +62,8 @@ int main()
             indexnum = 0;
             void *recAddress;
             recAddress = disk.recordIntoBlock(record); // insert packed record into a block, returns record address
-            Key key;
-            key.value = record.numVotes;
+            int key;
+            key = record.numVotes;
             tree.insertion(key,recAddress);
         }
         
@@ -87,7 +87,7 @@ int main()
     cout << "Content of Root Node: " << endl;
     for(int i=0; i<(tree.rootNode)->numKeys;i++)
     {
-        cout << (tree.rootNode)->keyArray[i].value << " ";
+        cout << (tree.rootNode)->keyArray[i] << " ";
     }
     cout << endl;
     
@@ -134,19 +134,19 @@ int main()
 void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk)
 {
     DataAddressList* addressList_cursor;
-    Key keyStruct;
-    keyStruct.value = key;
+    int keyStruct;
+    keyStruct = key;
     float totalAvg = 0;
     int numOfRecords = 0;
     clock_t start, end;
     clock_t startLinear, endLinear;
     start = clock();
     cout << "RETRIEVAL USING BPLUSTREE:" << endl;
-    cout << "Key: numVotes = " << keyStruct.value << endl;
+    cout << "Key: numVotes = " << keyStruct << endl;
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, keyStruct);
     for(int i=0; i<leafNode->numKeys;i++)
     {
-        if((leafNode->keyArray[i].value) == key)
+        if((leafNode->keyArray[i]) == key)
         {
             addressList_cursor = (DataAddressList*) leafNode->pointerArray[i];
             while(true){    // loop through the addressList for each key
