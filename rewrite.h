@@ -5,7 +5,7 @@
 using namespace std;
 
 
-const int MAX_KEYS = 10;
+const int MAX_KEYS = 3;
 const int MAX_ADDRESSES = 5;
 
 
@@ -47,6 +47,9 @@ class BPlusTree {
         void insertleaf(int key, Node* leafNode, void* recAddress, int position);
         void createDummyArrays(int key, Node* leafNode, int tempKeyArray[], DataAddressList* tempPtrArray[], void* recAddress);
         tuple<Node*,Node*> splitLeafNode(int dummyKeyArray[],DataAddressList* dummyPtrArray[], Node* leafNode);
+        void deleteKey(int key);
+        void deleteAddressList(DataAddressList* addressList);
+        void removeInternal(int key, Node* parent, Node* leaf);
 };
 
 #endif

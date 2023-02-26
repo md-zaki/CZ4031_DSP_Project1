@@ -33,7 +33,7 @@ int main()
     // =================== Reading file and inserting into database ========================
 
     Record record; //declare temporary record
-    ifstream testData("data/data500.tsv"); // reading from file
+    ifstream testData("data/dataSmalltim.tsv"); // reading from file
     int count = 0;
 
     if (testData.is_open()){
@@ -104,6 +104,14 @@ int main()
 
     // ================================== Experiment 5 =====================================
     cout << "============ Experiment 5 ==============" << endl;
+
+    int key;
+    while(true){
+        cout << "Enter a number to delete: "; 
+        cin >> key;
+        tree.deleteKey(key);
+        tree.printTree(tree.rootNode);
+    }
 
     // ================================== Listing contents of a block =====================
     // int blocknum;
