@@ -458,10 +458,7 @@ void BPlusTree::deleteKey(int key){
             break;
         }
     }
-
     
-
-
     bool exist = false;
     int position=0;
     while(key > leafNode->keyArray[position] && position < leafNode->numKeys)   //find the position for key
@@ -475,7 +472,7 @@ void BPlusTree::deleteKey(int key){
     if(!exist){ //key does not exist, return
         return;
     }
-
+    
 // ====================== fix for when deleted key is in root =============================
     for(int i=0; i < rootNode->numKeys;i++)
     {
@@ -485,7 +482,7 @@ void BPlusTree::deleteKey(int key){
         }
     }
 // ========================================================================================
-
+    
     deleteAddressList((DataAddressList*)leafNode->pointerArray[position]); //de-allocate the memory for addresslist
     for(int i = position; i < leafNode->numKeys-1; i++){    //shift keys and pointers
         leafNode->keyArray[i] = leafNode->keyArray[i + 1];
@@ -501,6 +498,7 @@ void BPlusTree::deleteKey(int key){
         rootNode = NULL;
         return;
     }
+    
 
     if(leafNode->numKeys >= floor(float(MAX_KEYS+1)/2.0)){   //Case 1: if leaf node has more than minimum required keys, simply delete it
         if(position == 0 && leftSiblingIndex >= 0){
@@ -535,6 +533,8 @@ void BPlusTree::deleteKey(int key){
         }
     }
 
+    
+
     if(rightSiblingIndex <= parentNode->numKeys){   //if right sibling exists, borrow one key from it
         Node* rightSibling = (Node*)parentNode->pointerArray[rightSiblingIndex];
         if(rightSibling->numKeys > floor(float(MAX_KEYS+1)/2.0)){   //check if right sibling has enough keys to borrow
@@ -555,7 +555,10 @@ void BPlusTree::deleteKey(int key){
         }
     }
 
+    
+
     if(leftSiblingIndex >= 0){
+        
         Node *leftSibling = (Node*)parentNode->pointerArray[leftSiblingIndex];
         for(int i = leftSibling->numKeys, j = 0; j < leafNode->numKeys; i++, j++) { //merge leaf node with left sibling
             leftSibling->keyArray[i] = leafNode->keyArray[j];
@@ -564,12 +567,14 @@ void BPlusTree::deleteKey(int key){
         leftSibling->numKeys += leafNode->numKeys;
         leftSibling->pointerArray[leftSibling->numKeys] = leafNode->pointerArray[leafNode->numKeys];
         removeInternal(parentNode->keyArray[leftSiblingIndex], parentNode, leafNode);
-        delete[] leafNode->keyArray;
-        delete[] leafNode->pointerArray;
-        delete leafNode;
-
         
-    }else if(rightSiblingIndex <= parentNode->numKeys){
+        // delete[] leafNode->keyArray;
+        // delete[] leafNode->pointerArray;
+        
+        // delete leafNode;
+        
+    }
+    else if(rightSiblingIndex <= parentNode->numKeys){
         Node* rightSibling = (Node*)parentNode->pointerArray[rightSiblingIndex];
         for (int i = leafNode->numKeys, j = 0; j < rightSibling->numKeys; i++, j++) {   //merge leaf node with right sibling
             leafNode->keyArray[i] = rightSibling->keyArray[j];
@@ -579,9 +584,9 @@ void BPlusTree::deleteKey(int key){
         leafNode->pointerArray[leafNode->numKeys] = rightSibling->pointerArray[rightSibling->numKeys];
         cout << "key to be removed in internal: " << parentNode->keyArray[rightSiblingIndex - 1] << endl;
         removeInternal(parentNode->keyArray[rightSiblingIndex - 1], parentNode, rightSibling);
-        delete[] rightSibling->keyArray;
-        delete[] rightSibling->pointerArray;
-        delete rightSibling;
+        // delete[] rightSibling->keyArray;
+        // delete[] rightSibling->pointerArray;
+        // delete rightSibling;
 
         
     }
@@ -590,26 +595,32 @@ void BPlusTree::deleteKey(int key){
 
 void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
 {
-    if (parent == rootNode && parent->numKeys == 1) // if root only has 1 key
+    if (parent == rootNode ) // if root only has 1 key
+    
     {
-        if (parent->pointerArray[0] == leaf) // if pointer points to child that is to be deleted
+        if(parent->numKeys == 1)
         {
-            rootNode = (Node*)(parent->pointerArray[1]); // assign rootNode to other child
-            delete[] leaf->keyArray;
-            delete[] leaf->pointerArray;
-            delete[] parent->keyArray;
-            delete[] parent->pointerArray;
-            return;
+            if (parent->pointerArray[0] == leaf) // if pointer points to child that is to be deleted
+            {
+                rootNode = (Node*)(parent->pointerArray[1]); // assign rootNode to other child
+                delete[] leaf->keyArray;
+                delete[] leaf->pointerArray;
+                delete[] parent->keyArray;
+                delete[] parent->pointerArray;
+                return;
+            }
+            else if(parent->pointerArray[1] == leaf)  // if pointer points to child that is to be deleted
+            {
+                rootNode = (Node*)(parent->pointerArray[0]); // assign rootNode to other child
+                delete[] leaf->keyArray;
+                delete[] leaf->pointerArray;
+                delete[] parent->keyArray;
+                delete[] parent->pointerArray;
+                return;
+            }
         }
-        else if(parent->pointerArray[1] == leaf)  // if pointer points to child that is to be deleted
-        {
-            rootNode = (Node*)(parent->pointerArray[0]); // assign rootNode to other child
-            delete[] leaf->keyArray;
-            delete[] leaf->pointerArray;
-            delete[] parent->keyArray;
-            delete[] parent->pointerArray;
-            return;
-        }
+        
+        
        
     }
     bool exist = false; // zaki add
