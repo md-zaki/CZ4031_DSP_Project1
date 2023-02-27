@@ -678,7 +678,7 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
     if(leftSiblingIndex >= 0){  //If left sibling exist, borrow one key
         Node* leftSibling = (Node*)parentOfParent->pointerArray[leftSiblingIndex];
 
-        if(leftSibling->numKeys >= floor(float(MAX_KEYS)/2.0)){    //check if sibling node has enough keys to borrow
+        if(leftSibling->numKeys > floor(float(MAX_KEYS)/2.0)){    //check if sibling node has enough keys to borrow
             parent->pointerArray[parent->numKeys+1] = parent->pointerArray[parent->numKeys];
             for (int i = parent->numKeys; i > 0; i--) {    //shift keys so that we can borrow from sibling node
                 parent->keyArray[i] = parent->keyArray[i - 1];
@@ -697,7 +697,7 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
     if (rightSiblingIndex <= parentOfParent->numKeys)
     {
         Node *rightSibling = (Node*)parentOfParent->pointerArray[rightSiblingIndex];
-        if(rightSibling->numKeys >= floor(float(MAX_KEYS)/2.0))
+        if(rightSibling->numKeys > floor(float(MAX_KEYS)/2.0))
         {
             parent->keyArray[parent->numKeys] = parentOfParent->keyArray[position];
             parentOfParent->keyArray[position] = rightSibling->keyArray[0];
