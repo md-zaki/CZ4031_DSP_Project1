@@ -437,7 +437,16 @@ void BPlusTree::deleteKey(int key){
         return;
     }
 
+    
+
     auto [leafNode, parentNode] = traverseNonLeaf(rootNode,key);
+    for(int i=0; i < rootNode->numKeys;i++)
+    {
+        if(rootNode->keyArray[i] == key)
+        {
+            rootNode->keyArray[i] = leafNode->keyArray[1];
+        }
+    }
     int leftSiblingIndex;
     int rightSiblingIndex;
     for(int i = 0; i < parentNode->numKeys; i++){   //loop to find left and right siblings
@@ -486,7 +495,8 @@ void BPlusTree::deleteKey(int key){
 
     if(leafNode->numKeys >= floor(float(MAX_KEYS+1)/2.0)){   //Case 1: if leaf node has more than minimum required keys, simply delete it
         if(position == 0 && leftSiblingIndex >= 0){
-            parentNode->keyArray[leftSiblingIndex] = leafNode->keyArray[0];   //update parent if first key of the leafnode was deleted
+            removeInternal(key,parentNode,leafNode);
+            // parentNode->keyArray[leftSiblingIndex] = leafNode->keyArray[0];   //update parent if first key of the leafnode was deleted
         }
         return;
     }
@@ -554,14 +564,15 @@ void BPlusTree::deleteKey(int key){
         }
         leafNode->numKeys += rightSibling->numKeys;
         leafNode->pointerArray[leafNode->numKeys] = rightSibling->pointerArray[rightSibling->numKeys];
-        removeInternal(parentNode->keyArray[rightSiblingIndex - 1], parentNode, rightSibling);
         cout << "key to be removed in internal: " << parentNode->keyArray[rightSiblingIndex - 1] << endl;
+        removeInternal(parentNode->keyArray[rightSiblingIndex - 1], parentNode, rightSibling);
         delete[] rightSibling->keyArray;
         delete[] rightSibling->pointerArray;
         delete rightSibling;
 
         
     }
+    return;
 }
 
 void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
@@ -588,33 +599,42 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
         }
        
     }
-
+    bool exist = false; // zaki add
     int position;
     for(position = 0; position < parent->numKeys; position++) // find position of key to be deleted
     {
-        if(parent->keyArray[position] == key) break;
-    }
-    for (int i = position; i < parent->numKeys; i++) // delete key and move keys after deletion
-    {
-        parent->keyArray[i] = parent->keyArray[i+1];
-        cout << "new key array: " << parent->keyArray[i] << endl;
-    }
-
-    for (position = 0; position < parent->numKeys + 1; position++) // find position of pointer to be deleted
-    {
-        if(parent->pointerArray[position] == leaf)
+        if(parent->keyArray[position] == key)
         {
+            exist = true;
             break;
-        }
+        } 
+        
     }
-
-    for (int i = position; i < parent->numKeys + 1; i++) // delete pointer to child and move pointers after deletion
+    if (exist == true)
     {
-        parent->pointerArray[i] = parent->pointerArray[i + 1];
+        for (int i = position; i < parent->numKeys; i++) // delete key and move keys after deletion
+        {
+            parent->keyArray[i] = parent->keyArray[i+1];
+            cout << "new key array: " << parent->keyArray[i] << endl;
+        }
+
+        for (position = 0; position < parent->numKeys + 1; position++) // find position of pointer to be deleted
+        {
+            if(parent->pointerArray[position] == leaf)
+            {
+                break;
+            }
+        }
+
+        for (int i = position; i < parent->numKeys + 1; i++) // delete pointer to child and move pointers after deletion
+        {
+            parent->pointerArray[i] = parent->pointerArray[i + 1];
+        }
+        parent->numKeys--; // reduce numofKeys in parentNode
     }
+    
 
-    parent->numKeys--; // reduce numofKeys in parentNode
-
+    
     if(parent->numKeys >= floor(float(MAX_KEYS)/2)) return; // if number of keys is more than minimum num of keys required for an internal node
     
 
@@ -645,6 +665,7 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
             parent->pointerArray[0] = leftSibling->pointerArray[leftSibling->numKeys];
             parent->numKeys++;
             leftSibling->numKeys--;
+            // cout << "parent->keyArray[0]: " << parent->keyArray[0] << endl;
             return;
         }
     }
