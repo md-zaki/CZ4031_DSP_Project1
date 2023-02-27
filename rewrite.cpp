@@ -440,16 +440,12 @@ void BPlusTree::deleteKey(int key){
     
 
     auto [leafNode, parentNode] = traverseNonLeaf(rootNode,key);
-    for(int i=0; i < rootNode->numKeys;i++)
-    {
-        if(rootNode->keyArray[i] == key)
-        {
-            rootNode->keyArray[i] = leafNode->keyArray[1];
-        }
-    }
+    
+    
     int leftSiblingIndex;
     int rightSiblingIndex;
     for(int i = 0; i < parentNode->numKeys; i++){   //loop to find left and right siblings
+    
         if(key < parentNode->keyArray[i]){
             rightSiblingIndex = i+1;
             leftSiblingIndex = i-1;
@@ -462,6 +458,9 @@ void BPlusTree::deleteKey(int key){
             break;
         }
     }
+
+    
+
 
     bool exist = false;
     int position=0;
@@ -476,6 +475,16 @@ void BPlusTree::deleteKey(int key){
     if(!exist){ //key does not exist, return
         return;
     }
+
+// ====================== fix for when deleted key is in root =============================
+    for(int i=0; i < rootNode->numKeys;i++)
+    {
+        if(rootNode->keyArray[i] == key)
+        {
+            rootNode->keyArray[i] = leafNode->keyArray[1];
+        }
+    }
+// ========================================================================================
 
     deleteAddressList((DataAddressList*)leafNode->pointerArray[position]); //de-allocate the memory for addresslist
     for(int i = position; i < leafNode->numKeys-1; i++){    //shift keys and pointers
@@ -495,15 +504,19 @@ void BPlusTree::deleteKey(int key){
 
     if(leafNode->numKeys >= floor(float(MAX_KEYS+1)/2.0)){   //Case 1: if leaf node has more than minimum required keys, simply delete it
         if(position == 0 && leftSiblingIndex >= 0){
-            removeInternal(key,parentNode,leafNode);
-            // parentNode->keyArray[leftSiblingIndex] = leafNode->keyArray[0];   //update parent if first key of the leafnode was deleted
+            // removeInternal(key,parentNode,leafNode);
+            parentNode->keyArray[leftSiblingIndex] = leafNode->keyArray[0];   //update parent if first key of the leafnode was deleted
         }
         return;
     }
 
     if(leftSiblingIndex >= 0){  //If left sibling exist, borrow one key
         Node* leftSibling = (Node*)parentNode->pointerArray[leftSiblingIndex];
-
+        // cout << "left sibling index: " << leftSiblingIndex << endl;
+        // for(int i=0; i<leftSibling->numKeys;i++)
+        // {
+        //     cout << leftSibling->keyArray[i] << endl;
+        // }
         if(leftSibling->numKeys > floor(float(MAX_KEYS+1)/2.0)){    //check if sibling node has enough keys to borrow
             leafNode->pointerArray[leafNode->numKeys+1] = leafNode->pointerArray[leafNode->numKeys];
             for (int i = leafNode->numKeys; i > 0; i--) {    //shift keys so that we can borrow from sibling node
