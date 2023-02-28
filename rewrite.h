@@ -5,7 +5,7 @@
 using namespace std;
 
 
-const int MAX_KEYS = 3;
+const int MAX_KEYS = 15;
 const int MAX_ADDRESSES = 5;
 
 

@@ -20,6 +20,7 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print);
 void searchStorageSingle(int key, StorageDisk disk, bool print);
 void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, bool print);
 void searchStorageRange(int lower, int upper, StorageDisk disk, bool print);
+void deletelinearscan(StorageDisk disk, bool print, int key);
 
 int main()
 {
@@ -111,6 +112,9 @@ int main()
                 tree.printTree(tree.rootNode);
                 cout << endl;
             }
+            // size = sizeof(*(tree.rootNode->keyArray)) + sizeof(*(tree.rootNode->pointerArray)) + sizeof(tree.rootNode->isLeaf) + sizeof(tree.rootNode->numKeys);
+            // size_t size = sizeof(tree.rootNode->isLeaf) + sizeof(tree.rootNode->numKeys) + sizeof(int*) * MAX_KEYS + sizeof(void*) * (MAX_KEYS+1);
+            // cout << "Size of node: " << size << endl;
             
         }
         else if(choice == 3)
@@ -132,12 +136,14 @@ int main()
         {
             // ================================== Experiment 5 =====================================
             cout << "============ Experiment 5 ==============" << endl;
-
+            clock_t starttree, endtree;
             int key;
             // while(true){
                 cout << "Enter a number to delete: "; 
                 cin >> key;
+                starttree = clock();
                 tree.deleteKey(key);
+                endtree = clock();
                 if(print)
                 {
                     tree.printTree(tree.rootNode);
@@ -150,8 +156,19 @@ int main()
                 cout << (tree.rootNode)->keyArray[i] << " ";
             }
             cout << endl;
+            double time_taken_tree = double(endtree-starttree) / double(CLOCKS_PER_SEC);
+            cout << "Running time of deletion using BPlusTree: " << fixed << time_taken_tree << setprecision(5) << " seconds" << endl;
             // }
+            clock_t startscan, endscan;
+            startscan = clock();
+            deletelinearscan(disk, print, key);
+            endscan = clock();
+            double time_taken_scan = double(endscan-startscan) / double(CLOCKS_PER_SEC);
+            cout << "Running time of deletion using Linear Scan: " << fixed << time_taken_scan << setprecision(5) << " seconds" << endl;
+
+            
         }
+
         cout << "============================================" << endl;
         cout << "Key in Experiment to conduct: 1, 2, 3, 4 or 5" << endl;
         cout << "Key in 0 to exit" << endl;
@@ -182,6 +199,29 @@ int main()
     
     // ====================================================================================
     return 0;
+}
+
+void deletelinearscan(StorageDisk disk, bool print, int key)
+{
+    float totalAvg = 0;
+    int numOfRecords = 0;
+    int numofblocks=0;
+    for(int i = 0; i <= disk.numUsedBlocks; i++)
+    {
+        void *currentrecord; // declare pointer for record to be listed
+        unsigned char *selectedblockptr; // declare pointer to get block pointer to be listed
+        selectedblockptr = (unsigned char *)disk.diskPtr + i*disk.blockSize; // set block pointer to specified block number
+        for(int j=0;j<disk.blockSize;j=j+(sizeof(Record))) // iterate through block
+        {
+            currentrecord = (unsigned char *)selectedblockptr+j; // set current record (block ptr + offset)
+            if(key == (*((Record *)currentrecord)).numVotes)
+            {
+                //  delete (Record*)currentrecord;
+            }
+            
+        }
+        numofblocks++;
+    }
 }
 
 void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
