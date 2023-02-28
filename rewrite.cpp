@@ -457,13 +457,45 @@ void BPlusTree::deleteKey(int key){
     }
     
 // ====================== fix for when deleted key is in root =============================
-    for(int i=0; i < rootNode->numKeys;i++)
+
+    Node *currentNode = rootNode;
+    Node* targetNode = NULL;    //the target node to be deleted
+    int targetPosition;     //the target position in the target node
+    while(currentNode->isLeaf == false && targetNode == NULL)
     {
-        if(rootNode->keyArray[i] == key) // if key to be deleted is in root
+        if(key == currentNode->keyArray[0] ){
+            targetNode = currentNode;
+            targetPosition = 0;
+            break;
+        }
+        for(int index=0; index<(currentNode->numKeys);index++) // check root node first
         {
-            rootNode->keyArray[i] = leafNode->keyArray[1]; // change to the next value
+            if (key < currentNode->keyArray[index]) // if key to be inserted is less than key in index
+            {
+                
+                currentNode = (Node*)currentNode->pointerArray[index]; // set current node to pointer in root node corresponding to key i
+                break;
+            }
+            if(key == currentNode->keyArray[index+1] && currentNode->isLeaf == false){  //check if key exist in currentNode
+                    targetNode = currentNode;
+                    targetPosition = index + 1;
+                    break;
+                }
+            if(index == (currentNode->numKeys)-1) // if iterate until last key
+            {
+                currentNode = (Node*)currentNode->pointerArray[index+1]; // set current node to node pointed by last pointer
+                break;
+            }
         }
     }
+
+    // for(int i=0; i < rootNode->numKeys;i++)
+    // {
+    //     if(rootNode->keyArray[i] == key)
+    //     {
+    //         rootNode->keyArray[i] = leafNode->keyArray[1];
+    //     }
+    // }
 // ========================================================================================
     
     deleteAddressList((DataAddressList*)leafNode->pointerArray[position]); //de-allocate the memory for addresslist
@@ -480,6 +512,13 @@ void BPlusTree::deleteKey(int key){
         delete leafNode;
         rootNode = NULL;
         return;
+    }
+    
+    if(targetNode != NULL){ //delete internal key that is not a direct parent of leaf node
+        for(int i=targetPosition; i < targetNode->numKeys-1;i++){      
+                rootNode->keyArray[i] = rootNode->keyArray[i+1];
+        }
+        targetNode->keyArray[targetPosition] = leafNode->keyArray[1];   //update with new key
     }
     
 
@@ -709,11 +748,11 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
     {
         Node *leftSibling = (Node*)parentOfParent->pointerArray[leftSiblingIndex];
         leftSibling->keyArray[leftSibling->numKeys] = parentOfParent->keyArray[leftSiblingIndex];
-        for (int i = leftSibling->numKeys + 1, j=0; j < parent->numKeys; j++)
+        for (int i = leftSibling->numKeys + 1, j=0; j < parent->numKeys; j++, i++)
         {
             leftSibling->keyArray[i] = parent->keyArray[j];
         }
-        for (int i = leftSibling->numKeys + 1, j=0; j < parent->numKeys + 1; j++)
+        for (int i = leftSibling->numKeys + 1, j=0; j < parent->numKeys + 1; j++, i++)
         {
             leftSibling->pointerArray[i] = parent->pointerArray[j];
             parent->pointerArray[j] = NULL;
@@ -727,18 +766,18 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
     {
         Node *rightSibling = (Node*)parentOfParent->pointerArray[rightSiblingIndex];
         parent->keyArray[parent->numKeys] = parentOfParent->keyArray[rightSiblingIndex-1];
-        for (int i = parent->numKeys + 1, j = 0; j<rightSibling->numKeys; j++)
+        for (int i = parent->numKeys + 1, j = 0; j<rightSibling->numKeys; j++, i++)
         {
             parent->keyArray[i] = rightSibling->keyArray[j];
         }
-        for (int i = parent->numKeys + 1, j=0; j<rightSibling->numKeys+1; j++)
+        for (int i = parent->numKeys + 1, j=0; j<rightSibling->numKeys+1; j++, i++)
         {
             parent->pointerArray[i] = rightSibling->pointerArray[j];
             rightSibling->pointerArray[j] = NULL;
         }
         parent->numKeys += rightSibling->numKeys + 1;
         rightSibling->numKeys = 0;
-        removeInternal(parentOfParent->keyArray[rightSiblingIndex], parentOfParent, rightSibling);
+        removeInternal(parentOfParent->keyArray[rightSiblingIndex - 1], parentOfParent, rightSibling);
     }
 
     return;
