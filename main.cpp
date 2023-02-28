@@ -121,15 +121,15 @@ int main()
         {
             // ================================== Experiment 3 =====================================
             cout << "============ Experiment 3 ==============" << endl;
-            searchTreeSingle(13, tree, disk, print);
+            searchTreeSingle(500, tree, disk, print);
             cout << endl;
         }
         else if(choice == 4)
         {
             // ================================== Experiment 4 =====================================
             cout << "============ Experiment 4 ==============" << endl;
-            int lower = 10;
-            int upper = 11;
+            int lower = 30000;
+            int upper = 40000;
             searchTreeRange(lower,upper,tree,disk, print);
         }   
         else if(choice == 5)
@@ -231,6 +231,7 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
     keyStruct = key;
     float totalAvg = 0;
     int numOfRecords = 0;
+    int numOfBlocksAccessed = 0;
     clock_t start, end;
     clock_t startLinear, endLinear;
     start = clock();
@@ -241,6 +242,7 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
     {
         if((leafNode->keyArray[i]) == key)
         {
+            numOfBlocksAccessed++;
             addressList_cursor = (DataAddressList*) leafNode->pointerArray[i];
             while(true){    // loop through the addressList for each key
                 for(int j=0; j<addressList_cursor->size; j++){
@@ -259,6 +261,7 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
                     break;
                 }
                 addressList_cursor = addressList_cursor->nextList;
+                numOfBlocksAccessed++;
             }
         }
     }
@@ -267,7 +270,7 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
     cout << endl;
 
     cout << "Number of index nodes processed: " << tree.numOfLevels << endl;
-    cout << "Number of data blocks the processed: " << tree.numOfLevels + 1 << endl;
+    cout << "Number of data blocks the processed: " << numOfBlocksAccessed + tree.numOfLevels << endl;
     float avgAll;
     avgAll = (float)(totalAvg/(float)(numOfRecords));
     cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
@@ -328,6 +331,7 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
     bool check = true;
     float totalAvg = 0;
     int numOfRecords = 0;
+    int numOfBlocksAccessed = 0;
     clock_t start, end;
     clock_t startLinear, endLinear;
     start = clock();
@@ -340,6 +344,7 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
         {
             if((leafNode->keyArray[i]) >= lower && (leafNode->keyArray[i]) <= upper)
             {
+                numOfBlocksAccessed++;
                 check = true;
                 addressList_cursor = (DataAddressList*) leafNode->pointerArray[i];
                 while(true){    // loop through the addressList for each key
@@ -359,6 +364,7 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
                         break;
                     }
                     addressList_cursor = addressList_cursor->nextList;
+                    numOfBlocksAccessed++;
                 }
             }
             else
@@ -367,13 +373,15 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
             }
         }
         leafNode = (Node*)leafNode->pointerArray[leafNode->numKeys];
+        numOfBlocksAccessed++;
+        
     }
 
     end = clock();
     double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
 
     cout << "Number of index nodes processed: " << tree.numOfLevels << endl;
-    cout << "Number of data blocks the processed: " << tree.numOfLevels + 1 << endl;
+    cout << "Number of data blocks processed: " << numOfBlocksAccessed + tree.numOfLevels << endl;
     float avgAll;
     avgAll = (float)(totalAvg/(float)(numOfRecords));
     cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
