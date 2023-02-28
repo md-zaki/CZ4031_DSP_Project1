@@ -401,33 +401,33 @@ void BPlusTree::printTree(Node *currentNode) {
         cout << endl;
     }
     //TIM ADDED THIS CHUNK BELOW FOR PRINTING THE LINKED ADDRESSLIST
-    DataAddressList* addressList_cursor; 
-    Node* next_node;
-    while(true){    //keep looping through leaf nodes
-        next_node = (Node*)first_leaf_node->pointerArray[first_leaf_node->numKeys];
+    // DataAddressList* addressList_cursor; 
+    // Node* next_node;
+    // while(true){    //keep looping through leaf nodes
+    //     next_node = (Node*)first_leaf_node->pointerArray[first_leaf_node->numKeys];
 
-        for(int i=0; i<first_leaf_node->numKeys; i++){  //loop through the each keys in the leaf node
-            addressList_cursor = (DataAddressList*) first_leaf_node->pointerArray[i];
-            //cout << "--------KEY IS " << first_leaf_node->keyArray[i].value << "----------" << endl;
-            while(true){    // loop through the addressList for each key
-                for(int j=0; j<addressList_cursor->size; j++){
-                    cout << addressList_cursor->addressList[j]->tconst << " ";
-                    cout << addressList_cursor->addressList[j]->averageRating << " ";
-                    cout << addressList_cursor->addressList[j]->numVotes << endl;
-                }
-                if(addressList_cursor->nextList == NULL){   //end of linked addressList
-                    break;
-                }
-                addressList_cursor = addressList_cursor->nextList;
-            }   
-        }
+    //     for(int i=0; i<first_leaf_node->numKeys; i++){  //loop through the each keys in the leaf node
+    //         addressList_cursor = (DataAddressList*) first_leaf_node->pointerArray[i];
+    //         //cout << "--------KEY IS " << first_leaf_node->keyArray[i].value << "----------" << endl;
+    //         while(true){    // loop through the addressList for each key
+    //             for(int j=0; j<addressList_cursor->size; j++){
+    //                 cout << addressList_cursor->addressList[j]->tconst << " ";
+    //                 cout << addressList_cursor->addressList[j]->averageRating << " ";
+    //                 cout << addressList_cursor->addressList[j]->numVotes << endl;
+    //             }
+    //             if(addressList_cursor->nextList == NULL){   //end of linked addressList
+    //                 break;
+    //             }
+    //             addressList_cursor = addressList_cursor->nextList;
+    //         }   
+    //     }
 
-        if(next_node == NULL){
-            break;
-        }
-        first_leaf_node = next_node;
-        cout << endl;
-    }
+    //     if(next_node == NULL){
+    //         break;
+    //     }
+    //     first_leaf_node = next_node;
+    //     cout << endl;
+    // }
 }
 
 

@@ -16,11 +16,14 @@ using namespace std;
 
 #include <bits/stdc++.h>
 
-void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk);
-void searchStorageSingle(int key, StorageDisk disk);
+void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print);
+void searchStorageSingle(int key, StorageDisk disk, bool print);
+void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, bool print);
+void searchStorageRange(int lower, int upper, StorageDisk disk, bool print);
 
 int main()
 {
+    bool print = true; // true to print out everything, false to omit printing in output
     int blockSize, diskSize;
     blockSize = 200; // declare blockSize in bytes
     diskSize = 100000000; // declare whole disk size in bytes
@@ -33,7 +36,7 @@ int main()
     // =================== Reading file and inserting into database ========================
 
     Record record; //declare temporary record
-    ifstream testData("data/dataSmalltim.tsv"); // reading from file
+    ifstream testData("data/data500.tsv"); // reading from file
     int count = 0;
 
     if (testData.is_open()){
@@ -68,51 +71,91 @@ int main()
         }
         
     }
-
-     // ================================== Experiment 1 =====================================
-    cout << "=========== Experiment 1 ===============" << endl;
-    int numofrecords;
-    numofrecords = disk.assignedRecordsSize / sizeof(Record);
-    cout << "Number of records in disk: " << numofrecords << endl;
-    cout << "Size of a record: " << sizeof(Record) << endl;
-    cout << "Number of records stored in a block: " << disk.blockSize/sizeof(Record) << endl;
-    cout << "Number of blocks used for storing data: " << disk.numUsedBlocks + 1 << endl; 
-    cout << endl;
-    
-    // ================================== Experiment 2 =====================================
-    cout << "============ Experiment 2 ==============" << endl;
-    cout << "Parameter n of B+ Tree: " << MAX_KEYS << endl;
-    cout << "Number of nodes in B+ Tree: " << tree.numOfNodes << endl;
-    cout << "Number of levels in B+ Tree: " << tree.numOfLevels << endl;
-    cout << "Content of Root Node: " << endl;
-    for(int i=0; i<(tree.rootNode)->numKeys;i++)
+    cout << "================== Welcome to CZ4031 Project 1, Database Systems Principles ======================" << endl;
+    cout << "Key in Experiment to conduct: 1, 2, 3, 4 or 5" << endl;
+    cout << "Key in 0 to exit" << endl;
+    cout << "Experiment: " ;
+    int choice;
+    cin >> choice;
+    while(choice != 0)
     {
-        cout << (tree.rootNode)->keyArray[i] << " ";
+        if(choice == 1)
+        {
+            // ================================== Experiment 1 =====================================
+            cout << "=========== Experiment 1 ===============" << endl;
+            int numofrecords;
+            numofrecords = disk.assignedRecordsSize / sizeof(Record);
+            cout << "Number of records in disk: " << numofrecords << endl;
+            cout << "Size of a record: " << sizeof(Record) << endl;
+            cout << "Number of records stored in a block: " << disk.blockSize/sizeof(Record) << endl;
+            cout << "Number of blocks used for storing data: " << disk.numUsedBlocks + 1 << endl; 
+            cout << endl;
+        }
+        else if(choice == 2)
+        {
+            // ================================== Experiment 2 =====================================
+            cout << "============ Experiment 2 ==============" << endl;
+            cout << "Parameter n of B+ Tree: " << MAX_KEYS << endl;
+            cout << "Number of nodes in B+ Tree: " << tree.numOfNodes << endl;
+            cout << "Number of levels in B+ Tree: " << tree.numOfLevels << endl;
+            cout << "Content of Root Node: " << endl;
+            for(int i=0; i<(tree.rootNode)->numKeys;i++)
+            {
+                cout << (tree.rootNode)->keyArray[i] << " ";
+            }
+            cout << endl;
+            
+            if(print)
+            {
+                cout << "Printed B+ Tree (not needed for final submission)" << endl;
+                tree.printTree(tree.rootNode);
+                cout << endl;
+            }
+            
+        }
+        else if(choice == 3)
+        {
+            // ================================== Experiment 3 =====================================
+            cout << "============ Experiment 3 ==============" << endl;
+            searchTreeSingle(13, tree, disk, print);
+            cout << endl;
+        }
+        else if(choice == 4)
+        {
+            // ================================== Experiment 4 =====================================
+            cout << "============ Experiment 4 ==============" << endl;
+            int lower = 10;
+            int upper = 11;
+            searchTreeRange(lower,upper,tree,disk, print);
+        }   
+        else if(choice == 5)
+        {
+            // ================================== Experiment 5 =====================================
+            cout << "============ Experiment 5 ==============" << endl;
+
+            int key;
+            while(true){
+                cout << "Enter a number to delete: "; 
+                cin >> key;
+                tree.deleteKey(key);
+                if(print)
+                {
+                    tree.printTree(tree.rootNode);
+                }
+                
+            //     cout << "Content of Root Node: " << endl;
+            // for(int i=0; i<(tree.rootNode)->numKeys;i++)
+            // {
+            //     cout << (tree.rootNode)->keyArray[i] << " ";
+            // }
+            }
+        }
+        cout << "============================================" << endl;
+        cout << "Key in Experiment to conduct: 1, 2, 3, 4 or 5" << endl;
+        cout << "Key in 0 to exit" << endl;
+        cout << "Choice: " ;
+        cin >> choice;
     }
-    cout << endl;
-    
-    cout << "Printed B+ Tree (not needed for final submission)" << endl;
-    tree.printTree(tree.rootNode);
-    cout << endl;
-
-    // ================================== Experiment 3 =====================================
-    cout << "============ Experiment 3 ==============" << endl;
-    searchTreeSingle(13, tree, disk);
-    cout << endl;
-    // ================================== Experiment 4 =====================================
-    cout << "============ Experiment 4 ==============" << endl;
-
-    // ================================== Experiment 5 =====================================
-    cout << "============ Experiment 5 ==============" << endl;
-
-    int key;
-    while(true){
-        cout << "Enter a number to delete: "; 
-        cin >> key;
-        tree.deleteKey(key);
-        tree.printTree(tree.rootNode);
-    }
-
     // ================================== Listing contents of a block =====================
     // int blocknum;
     // cout << "================= Listing contents of a block ===============" << endl;
@@ -139,7 +182,7 @@ int main()
     return 0;
 }
 
-void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk)
+void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
 {
     DataAddressList* addressList_cursor;
     int keyStruct;
@@ -159,9 +202,13 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk)
             addressList_cursor = (DataAddressList*) leafNode->pointerArray[i];
             while(true){    // loop through the addressList for each key
                 for(int j=0; j<addressList_cursor->size; j++){
-                    cout << "tconst: " << addressList_cursor->addressList[j]->tconst << " ";
-                    cout << "avgRating: " << addressList_cursor->addressList[j]->averageRating << " ";
-                    cout << "numVotes: " << addressList_cursor->addressList[j]->numVotes << endl;
+                    if(print)
+                    {
+                        cout << "tconst: " << addressList_cursor->addressList[j]->tconst << " ";
+                        cout << "avgRating: " << addressList_cursor->addressList[j]->averageRating << " ";
+                        cout << "numVotes: " << addressList_cursor->addressList[j]->numVotes << endl;
+                    }
+                    
                     totalAvg = totalAvg + (float)(addressList_cursor->addressList[j]->averageRating);
                     numOfRecords++;
 
@@ -185,7 +232,7 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk)
     cout << "Running time of retrieval using BPlusTree: " << fixed << time_taken << setprecision(5) << " seconds" << endl;
 
     startLinear = clock();
-    searchStorageSingle(key, disk);
+    searchStorageSingle(key, disk, print);
     endLinear = clock();
     double time_taken_linear = double(endLinear-startLinear) / double(CLOCKS_PER_SEC);
     cout << "Running time of retrieval using Linear Search: " << fixed << time_taken_linear << setprecision(5) << " seconds" << endl;
@@ -194,11 +241,11 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk)
 
 }
 
-void searchStorageSingle(int key, StorageDisk disk)
+void searchStorageSingle(int key, StorageDisk disk, bool print)
 {
     cout << endl;
     cout << "RETRIEVAL USING LINEAR SEARCH:" << endl;
-    cout << " Key: numVotes = " << key << endl;
+    cout << "Key: numVotes = " << key << endl;
     float totalAvg = 0;
     int numOfRecords = 0;
     int numofblocks=0;
@@ -212,9 +259,13 @@ void searchStorageSingle(int key, StorageDisk disk)
             currentrecord = (unsigned char *)selectedblockptr+j; // set current record (block ptr + offset)
             if(key == (*((Record *)currentrecord)).numVotes)
             {
-                cout << "tcosnt: " << (*((Record *)currentrecord)).tconst << ", ";
-                cout << "avgRating: " << (*((Record *)currentrecord)).averageRating << ", ";
-                cout << "numVotes: " << (*((Record *)currentrecord)).numVotes << endl;
+                if(print)
+                {
+                    cout << "tcosnt: " << (*((Record *)currentrecord)).tconst << ", ";
+                    cout << "avgRating: " << (*((Record *)currentrecord)).averageRating << ", ";
+                    cout << "numVotes: " << (*((Record *)currentrecord)).numVotes << endl;
+                }
+                
                 totalAvg = totalAvg + (*((Record *)currentrecord)).averageRating;
                 numOfRecords++;
             }
@@ -229,7 +280,106 @@ void searchStorageSingle(int key, StorageDisk disk)
     cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
 
 }
-void searchTreeRange(int key)
+void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, bool print)
 {
- // to be done
+    DataAddressList* addressList_cursor;
+    bool check = true;
+    float totalAvg = 0;
+    int numOfRecords = 0;
+    clock_t start, end;
+    clock_t startLinear, endLinear;
+    start = clock();
+    cout << "RETRIEVAL USING BPLUSTREE:" << endl;
+    cout << "Key: numVotes between " << lower << " and " << upper << endl;
+    auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, lower);
+    while(check)
+    {
+        for(int i=0; i<leafNode->numKeys;i++)
+        {
+            if((leafNode->keyArray[i]) >= lower && (leafNode->keyArray[i]) <= upper)
+            {
+                check = true;
+                addressList_cursor = (DataAddressList*) leafNode->pointerArray[i];
+                while(true){    // loop through the addressList for each key
+                    for(int j=0; j<addressList_cursor->size; j++){
+                        if(print)
+                        {
+                            cout << "tconst: " << addressList_cursor->addressList[j]->tconst << " ";
+                            cout << "avgRating: " << addressList_cursor->addressList[j]->averageRating << " ";
+                            cout << "numVotes: " << addressList_cursor->addressList[j]->numVotes << endl;
+                        }
+                        
+                        totalAvg = totalAvg + (float)(addressList_cursor->addressList[j]->averageRating);
+                        numOfRecords++;
+
+                    }
+                    if(addressList_cursor->nextList == NULL){   //end of linked addressList
+                        break;
+                    }
+                    addressList_cursor = addressList_cursor->nextList;
+                }
+            }
+            else
+            {
+                check = false;
+            }
+        }
+        leafNode = (Node*)leafNode->pointerArray[leafNode->numKeys];
+    }
+
+    end = clock();
+    double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
+
+    cout << "Number of index nodes processed: " << tree.numOfLevels << endl;
+    cout << "Number of data blocks the processed: " << tree.numOfLevels + 1 << endl;
+    float avgAll;
+    avgAll = (float)(totalAvg/(float)(numOfRecords));
+    cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
+    cout << "Running time of retrieval using BPlusTree: " << fixed << time_taken << setprecision(5) << " seconds" << endl;
+
+    startLinear = clock();
+    searchStorageRange(lower, upper,  disk, print);
+    endLinear = clock();
+    double time_taken_linear = double(endLinear-startLinear) / double(CLOCKS_PER_SEC);
+    cout << "Running time of retrieval using Linear Search: " << fixed << time_taken_linear << setprecision(5) << " seconds" << endl;
+}
+
+void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
+{
+    cout << endl;
+    cout << "RETRIEVAL USING LINEAR SEARCH:" << endl;
+    cout << "Key: numVotes between " << lower << " and " << upper << endl;
+    float totalAvg = 0;
+    int numOfRecords = 0;
+    int numofblocks=0;
+    for(int i = 0; i <= disk.numUsedBlocks; i++)
+    {
+        void *currentrecord; // declare pointer for record to be listed
+        unsigned char *selectedblockptr; // declare pointer to get block pointer to be listed
+        selectedblockptr = (unsigned char *)disk.diskPtr + i*disk.blockSize; // set block pointer to specified block number
+        for(int j=0;j<disk.blockSize;j=j+(sizeof(Record))) // iterate through block
+        {
+            currentrecord = (unsigned char *)selectedblockptr+j; // set current record (block ptr + offset)
+            if((*((Record *)currentrecord)).numVotes >= lower && (*((Record *)currentrecord)).numVotes <= upper)
+            {
+                if(print)
+                {
+                    cout << "tcosnt: " << (*((Record *)currentrecord)).tconst << ", ";
+                    cout << "avgRating: " << (*((Record *)currentrecord)).averageRating << ", ";
+                    cout << "numVotes: " << (*((Record *)currentrecord)).numVotes << endl;
+                }
+                
+                totalAvg = totalAvg + (*((Record *)currentrecord)).averageRating;
+                numOfRecords++;
+            }
+            
+        }
+        numofblocks++;
+    }
+
+    cout << "Number of data blocks accessed: " << numofblocks << endl;
+    float avgAll;
+    avgAll = (float)(totalAvg/(float)(numOfRecords));
+    cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
+
 }
