@@ -50,6 +50,7 @@ class BPlusTree {
         void deleteKey(int key);
         void deleteAddressList(DataAddressList* addressList);
         void removeInternal(int key, Node* parent, Node* leaf);
+        tuple<int,int> getSiblingIndex(Node *parentNode, int key);
 };
 
 #endif

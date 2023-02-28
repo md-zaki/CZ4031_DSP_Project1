@@ -338,7 +338,6 @@ void BPlusTree::insertIntoNonLeaf(int key, Node *parentNode, Node *childNode) {
 
 
 Node *BPlusTree::findParentNode(Node *currentNode, Node *childNode) {
-    // Use DFS to find parent node
     Node *parentNode;
     if (currentNode->isLeaf || ((Node*)currentNode->pointerArray[0])->isLeaf) {
         return nullptr;
@@ -431,9 +430,35 @@ void BPlusTree::printTree(Node *currentNode) {
 }
 
 
+tuple<int,int> BPlusTree:: getSiblingIndex(Node *parentNode, int key)
+{
+    int leftSiblingIndex;
+    int rightSiblingIndex;
+    for(int i = 0; i < parentNode->numKeys; i++)
+    {   //loop to find left and right siblings
+    
+        if(key < parentNode->keyArray[i]) // find first key in parent that is smaller than target key
+        {
+            rightSiblingIndex = i+1; // right is current cursor plus 1
+            leftSiblingIndex = i-1; // left is current cursor minus 1
+            break;
+        }
+        if(i == (parentNode->numKeys)-1) // if iterate until last key
+        {
+            leftSiblingIndex = i; 
+            rightSiblingIndex = i+2;
+            break;
+        }
+    }
+
+    return {leftSiblingIndex, rightSiblingIndex};
+
+
+}
+
+
 void BPlusTree::deleteKey(int key){
-    if (rootNode == NULL) {
-        cout << "Tree empty\n";
+    if (rootNode == NULL || rootNode == nullptr) {
         return;
     }
 
@@ -441,23 +466,8 @@ void BPlusTree::deleteKey(int key){
 
     auto [leafNode, parentNode] = traverseNonLeaf(rootNode,key);
     
-    
-    int leftSiblingIndex;
-    int rightSiblingIndex;
-    for(int i = 0; i < parentNode->numKeys; i++){   //loop to find left and right siblings
-    
-        if(key < parentNode->keyArray[i]){
-            rightSiblingIndex = i+1;
-            leftSiblingIndex = i-1;
-            break;
-        }
-        if(i == (parentNode->numKeys)-1) // if iterate until last key
-        {
-            leftSiblingIndex = i;
-            rightSiblingIndex = i+2;
-            break;
-        }
-    }
+    auto[leftSiblingIndex,rightSiblingIndex] = getSiblingIndex(parentNode,key);
+
     
     bool exist = false;
     int position=0;
@@ -502,7 +512,6 @@ void BPlusTree::deleteKey(int key){
 
     if(leafNode->numKeys >= floor(float(MAX_KEYS+1)/2.0)){   //Case 1: if leaf node has more than minimum required keys, simply delete it
         if(position == 0 && leftSiblingIndex >= 0){
-            // removeInternal(key,parentNode,leafNode);
             parentNode->keyArray[leftSiblingIndex] = leafNode->keyArray[0];   //update parent if first key of the leafnode was deleted
         }
         return;
@@ -510,11 +519,6 @@ void BPlusTree::deleteKey(int key){
 
     if(leftSiblingIndex >= 0){  //If left sibling exist, borrow one key
         Node* leftSibling = (Node*)parentNode->pointerArray[leftSiblingIndex];
-        // cout << "left sibling index: " << leftSiblingIndex << endl;
-        // for(int i=0; i<leftSibling->numKeys;i++)
-        // {
-        //     cout << leftSibling->keyArray[i] << endl;
-        // }
         if(leftSibling->numKeys > floor(float(MAX_KEYS+1)/2.0)){    //check if sibling node has enough keys to borrow
             leafNode->pointerArray[leafNode->numKeys+1] = leafNode->pointerArray[leafNode->numKeys];
             for (int i = leafNode->numKeys; i > 0; i--) {    //shift keys so that we can borrow from sibling node
@@ -623,7 +627,7 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
         
        
     }
-    bool exist = false; // zaki add
+    bool exist = false; 
     int position;
     for(position = 0; position < parent->numKeys; position++) // find position of key to be deleted
     {
@@ -639,7 +643,7 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
         for (int i = position; i < parent->numKeys; i++) // delete key and move keys after deletion
         {
             parent->keyArray[i] = parent->keyArray[i+1];
-            cout << "new key array: " << parent->keyArray[i] << endl;
+            // cout << "new key array: " << parent->keyArray[i] << endl;
         }
 
         for (position = 0; position < parent->numKeys + 1; position++) // find position of pointer to be deleted
