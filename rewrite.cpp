@@ -679,17 +679,17 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
     if(parent->numKeys >= floor(float(MAX_KEYS)/2)) return; // if number of keys is more than minimum num of keys required for an internal node
     else if(parent == rootNode) return;
 
-    Node *parentOfParent = findParentNode(rootNode, parent);
+    Node *parentOfParent = findParentNode(rootNode, parent); // get parent
 
     
-    auto[leftSiblingIndex,rightSiblingIndex] = getSiblingIndexNonLeaf(parent, parentOfParent);
+    auto[leftSiblingIndex,rightSiblingIndex] = getSiblingIndexNonLeaf(parent, parentOfParent); // get siblings of parents
 
     // ============================ check siblings exists and if enough to give ===============================
     bool leftEnough, rightEnough, leftExist, rightExist;
     leftEnough, rightEnough = false;
     leftExist, rightExist = false;
 
-    if(leftSiblingIndex >= 0)//If left sibling exist, borrow one key
+    if(leftSiblingIndex >= 0) // check if left sibling exists and has enough to give
     {  leftExist = true;
         Node* leftSibling = (Node*)parentOfParent->pointerArray[leftSiblingIndex];
         if(leftSibling->numKeys > floor(float(MAX_KEYS)/2.0))
@@ -698,7 +698,7 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
         }
     }
 
-    if (rightSiblingIndex <= parentOfParent->numKeys)
+    if (rightSiblingIndex <= parentOfParent->numKeys) // check if right sibling exists and has enough to give
     {
         rightExist = true;
         Node *rightSibling = (Node*)parentOfParent->pointerArray[rightSiblingIndex];
@@ -800,8 +800,8 @@ tuple<int,int> BPlusTree:: getSiblingIndexLeaf(Node *parentNode, int key)
 {
     int leftSiblingIndex;
     int rightSiblingIndex;
-    for(int i = 0; i < parentNode->numKeys; i++)
-    {   //loop to find left and right siblings
+    for(int i = 0; i < parentNode->numKeys; i++) //loop to find left and right siblings
+    {   
     
         if(key < parentNode->keyArray[i]) // find first key in parent that is smaller than target key
         {
