@@ -553,7 +553,7 @@ void BPlusTree::deleteKey(int key){
 // ==========================================================================================================
 // ======================= Decide to borrow from sibling or to merge with sibling =====================
 
-    if(leftEnough) // borrow from left sibling
+    if(leftEnough == true) // borrow from left sibling
     {   Node* leftSibling = (Node*)parentNode->pointerArray[leftSiblingIndex];
         leafNode->pointerArray[leafNode->numKeys+1] = leafNode->pointerArray[leafNode->numKeys];
         for (int i = leafNode->numKeys; i > 0; i--) {    //shift keys so that we can borrow from sibling node
@@ -571,7 +571,7 @@ void BPlusTree::deleteKey(int key){
         return;
     } 
     
-    else if(rightEnough) // borrow from right sibling
+    else if(rightEnough == true) // borrow from right sibling
     {
         Node* rightSibling = (Node*)parentNode->pointerArray[rightSiblingIndex];
         leafNode->keyArray[leafNode->numKeys] = rightSibling->keyArray[0];
@@ -590,7 +590,7 @@ void BPlusTree::deleteKey(int key){
         return;
     } 
     
-    else if(leftExist) //merge leaf node into left sibling
+    else if(leftExist == true) //merge leaf node into left sibling
     {
         Node *leftSibling = (Node*)parentNode->pointerArray[leftSiblingIndex];
         int i = leftSibling->numKeys;
@@ -605,7 +605,7 @@ void BPlusTree::deleteKey(int key){
         removeInternal(parentNode->keyArray[leftSiblingIndex], parentNode, leafNode);
     } 
     
-    else if(rightExist)//merge right sibling into leaf node
+    else if(rightExist == true)//merge right sibling into leaf node
     {
         Node* rightSibling = (Node*)parentNode->pointerArray[rightSiblingIndex];
         int i = leafNode->numKeys;
