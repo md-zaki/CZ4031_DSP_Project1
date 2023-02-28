@@ -511,6 +511,8 @@ void BPlusTree::deleteKey(int key){
         delete[] leafNode->pointerArray;
         delete leafNode;
         rootNode = NULL;
+        numOfNodes--;
+        numOfLevels--;
         return;
     }
     
@@ -602,6 +604,7 @@ void BPlusTree::deleteKey(int key){
         }
         leftSibling->numKeys += leafNode->numKeys;
         leftSibling->pointerArray[leftSibling->numKeys] = leafNode->pointerArray[leafNode->numKeys];
+        numOfNodes--;
         removeInternal(parentNode->keyArray[leftSiblingIndex], parentNode, leafNode);
     } 
     
@@ -618,6 +621,7 @@ void BPlusTree::deleteKey(int key){
         leafNode->numKeys += rightSibling->numKeys;
         leafNode->pointerArray[leafNode->numKeys] = rightSibling->pointerArray[rightSibling->numKeys];
         cout << "key to be removed in internal: " << parentNode->keyArray[rightSiblingIndex - 1] << endl;
+        numOfNodes--;
         removeInternal(parentNode->keyArray[rightSiblingIndex - 1], parentNode, rightSibling);
     }
 
@@ -632,6 +636,8 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
         if(parent->numKeys == 1)
         {
             replaceRootNode(parent, leaf, rootNode);
+            numOfNodes--;
+            numOfLevels--;
         }
     }
 
@@ -759,6 +765,7 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
         }
         leftSibling->numKeys += parent->numKeys + 1;
         parent->numKeys = 0;
+        numOfNodes--;
         removeInternal(parentOfParent->keyArray[leftSiblingIndex], parentOfParent, parent);
     }
 
@@ -777,6 +784,7 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
         }
         parent->numKeys += rightSibling->numKeys + 1;
         rightSibling->numKeys = 0;
+        numOfNodes--;
         removeInternal(parentOfParent->keyArray[rightSiblingIndex - 1], parentOfParent, rightSibling);
     }
 

@@ -36,7 +36,7 @@ int main()
     // =================== Reading file and inserting into database ========================
 
     Record record; //declare temporary record
-    ifstream testData("data/data500.tsv"); // reading from file
+    ifstream testData("data/data20.tsv"); // reading from file
     int count = 0;
 
     if (testData.is_open()){
@@ -134,7 +134,7 @@ int main()
             cout << "============ Experiment 5 ==============" << endl;
 
             int key;
-            while(true){
+            // while(true){
                 cout << "Enter a number to delete: "; 
                 cin >> key;
                 tree.deleteKey(key);
@@ -142,13 +142,15 @@ int main()
                 {
                     tree.printTree(tree.rootNode);
                 }
-                
-            //     cout << "Content of Root Node: " << endl;
-            // for(int i=0; i<(tree.rootNode)->numKeys;i++)
-            // {
-            //     cout << (tree.rootNode)->keyArray[i] << " ";
-            // }
+            cout << "Num of nodes in tree: " << tree.numOfNodes << endl;
+            cout << "Num of levels in tree: " << tree.numOfLevels << endl;
+            cout << "Content of Root Node: ";
+            for(int i=0; i<(tree.rootNode)->numKeys;i++)
+            {
+                cout << (tree.rootNode)->keyArray[i] << " ";
             }
+            cout << endl;
+            // }
         }
         cout << "============================================" << endl;
         cout << "Key in Experiment to conduct: 1, 2, 3, 4 or 5" << endl;
