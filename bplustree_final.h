@@ -1,5 +1,5 @@
-#ifndef REWRITE_H
-#define REWRITE_H
+#ifndef BPLUSTREE_FINAL_H
+#define BPLUSTREE_FINAL_H
 
 #include <iostream>
 #include "storage.h"
