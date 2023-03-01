@@ -24,7 +24,7 @@ void deletelinearscan(StorageDisk disk, bool print, int key);
 
 int main()
 {
-    bool print = true; // true to print out everything, false to omit printing in output
+    bool print = false; // true to print out everything, false to omit printing in output
     int blockSize, diskSize;
     blockSize = 200; // declare blockSize in bytes
     diskSize = 100000000; // declare whole disk size in bytes
@@ -37,7 +37,7 @@ int main()
     // =================== Reading file and inserting into database ========================
 
     Record record; //declare temporary record
-    ifstream testData("data/data20.tsv"); // reading from file
+    ifstream testData("data/data.tsv"); // reading from file
     int count = 0;
 
     if (testData.is_open()){
@@ -139,8 +139,10 @@ int main()
             clock_t starttree, endtree;
             int key;
             // while(true){
-                cout << "Enter a number to delete: "; 
-                cin >> key;
+                // cout << "Enter a number to delete: "; 
+                // cin >> key;
+                key = 1000;
+                cout << "DELETE numVotes with value: "<< key <<  endl;
                 starttree = clock();
                 tree.deleteKey(key);
                 endtree = clock();
@@ -234,10 +236,11 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
     int numOfBlocksAccessed = 0;
     clock_t start, end;
     clock_t startLinear, endLinear;
-    start = clock();
+    
     cout << "RETRIEVAL USING BPLUSTREE:" << endl;
     cout << "Key: numVotes = " << keyStruct << endl;
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, keyStruct);
+    start = clock();
     for(int i=0; i<leafNode->numKeys;i++)
     {
         if((leafNode->keyArray[i]) == key)
@@ -332,6 +335,7 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
     float totalAvg = 0;
     int numOfRecords = 0;
     int numOfBlocksAccessed = 0;
+    int numOfIndex = 0;
     clock_t start, end;
     clock_t startLinear, endLinear;
     start = clock();
@@ -373,14 +377,20 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
             }
         }
         leafNode = (Node*)leafNode->pointerArray[leafNode->numKeys];
-        numOfBlocksAccessed++;
+        // numOfBlocksAccessed++;
+        if(check == true)
+        {
+            numOfIndex++;
+            numOfBlocksAccessed++;
+        }
+        
         
     }
 
     end = clock();
     double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
 
-    cout << "Number of index nodes processed: " << tree.numOfLevels << endl;
+    cout << "Number of index nodes processed: " << tree.numOfLevels + numOfIndex << endl;
     cout << "Number of data blocks processed: " << numOfBlocksAccessed + tree.numOfLevels << endl;
     float avgAll;
     avgAll = (float)(totalAvg/(float)(numOfRecords));
