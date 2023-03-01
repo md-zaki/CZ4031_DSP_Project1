@@ -1,0 +1,66 @@
+================== Welcome to CZ4031 Project 1, Database Systems Principles ======================
+Key in Experiment to conduct: 1, 2, 3, 4 or 5
+Key in 0 to exit
+Experiment: =========== Experiment 1 ===============
+Number of records in disk: 1070318
+Size of a record: 20
+Number of records stored in a block: 10
+Number of blocks used for storing data: 107032
+
+============================================
+Key in Experiment to conduct: 1, 2, 3, 4 or 5
+Key in 0 to exit
+Choice: ============ Experiment 2 ==============
+Parameter n of B+ Tree: 15
+Number of nodes in B+ Tree: 1882
+Number of levels in B+ Tree: 4
+Content of Root Node: 
+1162 2580 3700 4599 6706 8626 10716 13625 17760 22711 29297 44834 68806 153354 
+============================================
+Key in Experiment to conduct: 1, 2, 3, 4 or 5
+Key in 0 to exit
+Choice: ============ Experiment 3 ==============
+RETRIEVAL USING BPLUSTREE:
+Key: numVotes = 500
+
+Number of index nodes processed: 4
+Number of data blocks the processed: 9
+Average of averageRatings of all returned records: 6.73182
+Running time of retrieval using BPlusTree: 0.000000 seconds
+
+RETRIEVAL USING LINEAR SEARCH:
+Key: numVotes = 500
+Number of data blocks accessed: 107032
+Average of averageRatings of all returned records: 6.73182
+Running time of retrieval using Linear Search: 0.00100 seconds
+
+============================================
+Key in Experiment to conduct: 1, 2, 3, 4 or 5
+Key in 0 to exit
+Choice: ============ Experiment 4 ==============
+RETRIEVAL USING BPLUSTREE:
+Key: numVotes between 30000 and 40000
+Number of index nodes processed: 90
+Number of data blocks processed: 991
+Average of averageRatings of all returned records: 6.72791
+Running time of retrieval using BPlusTree: 0.00000 seconds
+
+RETRIEVAL USING LINEAR SEARCH:
+Key: numVotes between 30000 and 40000
+Number of data blocks accessed: 107032
+Average of averageRatings of all returned records: 6.72792
+Running time of retrieval using Linear Search: 0.00200 seconds
+============================================
+Key in Experiment to conduct: 1, 2, 3, 4 or 5
+Key in 0 to exit
+Choice: ============ Experiment 5 ==============
+DELETE numVotes with value: 1000
+Num of nodes in tree: 1882
+Num of levels in tree: 4
+Content of Root Node: 1162 2580 3700 4599 6706 8626 10716 13625 17760 22711 29297 44834 68806 153354 
+Running time of deletion using BPlusTree: 0.00000 seconds
+Running time of deletion using Linear Scan: 0.00100 seconds
+============================================
+Key in Experiment to conduct: 1, 2, 3, 4 or 5
+Key in 0 to exit
+Choice: 
