@@ -1,7 +1,8 @@
-#ifndef BPLUSTREE_H
-#define BPLUSTREE_H
+#ifndef REWRITE_H
+#define REWRITE_H
 
 #include <iostream>
+#include "storage.h"
 using namespace std;
 
 
