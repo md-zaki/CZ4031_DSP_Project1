@@ -7,7 +7,7 @@ using namespace std;
 
 
 const int MAX_KEYS = 15;
-const int MAX_ADDRESSES = 5;
+const int MAX_ADDRESSES = 23;
 
 
 class Node {
