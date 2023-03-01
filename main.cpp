@@ -4,7 +4,7 @@ using namespace std;
 #include "storage.h"
 #include "storage.cpp"
 #include "bplustree_final.h"
-#include "bplustree_final.h"
+#include "bplustree_final.cpp"
 #include <iostream>
 #include <fstream>
 #include <string>
