@@ -253,9 +253,10 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
     
     cout << "RETRIEVAL USING BPLUSTREE:" << endl;
     cout << "Key: numVotes = " << keyStruct << endl;
+    auto start = high_resolution_clock::now();
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, keyStruct);
     // start = clock();
-    auto start = high_resolution_clock::now();
+    
     for(int i=0; i<leafNode->numKeys;i++)
     {
         if((leafNode->keyArray[i]) == key)
@@ -383,9 +384,10 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
     // clock_t start, end;
     // clock_t startLinear, endLinear;
     // start = clock();
-    auto start = high_resolution_clock::now();
+    
     cout << "RETRIEVAL USING BPLUSTREE:" << endl;
     cout << "Key: numVotes between " << lower << " and " << upper << endl;
+    auto start = high_resolution_clock::now();
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, lower);
     while(check)
     {
@@ -490,6 +492,7 @@ void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
                     cout << "numVotes: " << (*((Record *)currentrecord)).numVotes << endl;
                 }
                 if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
+                    
                 }
                 else {
                         blocksAlreadyAccessed.push_back(block);
