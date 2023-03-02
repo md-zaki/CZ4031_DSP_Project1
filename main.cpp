@@ -321,6 +321,7 @@ void searchStorageSingle(int key, StorageDisk disk, bool print)
     float totalAvg = 0;
     int numOfRecords = 0;
     int numofblocks=0;
+    vector<int> blocksAlreadyAccessed;
     for(int i = 0; i <= disk.numUsedBlocks; i++)
     {
         void *currentrecord; // declare pointer for record to be listed
@@ -331,12 +332,21 @@ void searchStorageSingle(int key, StorageDisk disk, bool print)
             currentrecord = (unsigned char *)selectedblockptr+j; // set current record (block ptr + offset)
             if(key == (*((Record *)currentrecord)).numVotes)
             {
+                int block = getBlockRecordisIn((Record *)currentrecord, disk, j);
+                //    cout << "BLOCK: " <<  block <<endl;
+                   if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
+
+                    }
+                    else {
+                            blocksAlreadyAccessed.push_back(block);
+                    }
                 if(print)
                 {
                     cout << "tcosnt: " << (*((Record *)currentrecord)).tconst << ", ";
                     cout << "avgRating: " << (*((Record *)currentrecord)).averageRating << ", ";
                     cout << "numVotes: " << (*((Record *)currentrecord)).numVotes << endl;
                 }
+                
                 
                 totalAvg = totalAvg + (*((Record *)currentrecord)).averageRating;
                 numOfRecords++;
