@@ -421,7 +421,7 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
                                 // cout << "block added" << endl;
                         }
                         
-                        totalAvg = totalAvg + (float)(addressList_cursor->addressList[j]->averageRating);
+                        totalAvg = (float)totalAvg + (float)(addressList_cursor->addressList[j]->averageRating);
                         numOfRecords++;
 
                     }
@@ -503,7 +503,7 @@ void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
                         blocksAlreadyAccessed.push_back(block);
                         // cout << "block added" << endl;
                 }
-                totalAvg = totalAvg + (*((Record *)currentrecord)).averageRating;
+                totalAvg = totalAvg + (float)((Record *)currentrecord)->averageRating;
                 numOfRecords++;
             }
             
