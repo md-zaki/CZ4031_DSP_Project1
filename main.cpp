@@ -77,9 +77,9 @@ int main()
         
     }
     cout << "================== Welcome to CZ4031 Project 1, Database Systems Principles ======================" << endl;
-    cout << "Key in Experiment to conduct: 1, 2, 3, 4 or 5" << endl;
-    cout << "Key in 0 to exit" << endl;
-    cout << "Experiment: " ;
+    // cout << "Key in Experiment to conduct: 1, 2, 3, 4 or 5" << endl;
+    // cout << "Key in 0 to exit" << endl;
+    // cout << "Experiment: " ;
     //int choice;
     int choice=1; //if output to file, and cycle thru all experiments
     //cin >> choice; //comment if cycling thru all experiments
