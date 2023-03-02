@@ -746,12 +746,10 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
         for (int i = 0; i < rightSibling->numKeys-1; i++)
         {
             rightSibling->keyArray[i] = rightSibling->keyArray[i+1];
-        }
-        parent->pointerArray[parent->numKeys+1] = rightSibling->pointerArray[0];
-        for (int i = 0; i < rightSibling->numKeys; ++i)
-        {
             rightSibling->pointerArray[i] = rightSibling->pointerArray[i+1];
         }
+        parent->pointerArray[parent->numKeys+1] = rightSibling->pointerArray[0];
+        rightSibling->pointerArray[rightSibling->numKeys-1] = rightSibling->pointerArray[rightSibling->numKeys];
 
         rightSibling->numKeys--;
         parent->numKeys++;
