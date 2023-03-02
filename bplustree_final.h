@@ -54,6 +54,7 @@ class BPlusTree {
         tuple<int,int> getSiblingIndexLeaf(Node *parentNode, int key);
         void replaceRootNode(Node* parent, Node* leaf, Node* rootNode);
         tuple<int,int> getSiblingIndexNonLeaf(Node *parent, Node* parentOfParent);
+        tuple<Node*,Node*, int> splitNonLeafNode(int tempKeyArray[],Node* tempPointerArray[], Node* parentNode, int i, int j);
 };
 
 #endif
