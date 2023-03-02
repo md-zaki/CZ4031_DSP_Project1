@@ -457,7 +457,7 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
                             }
                         }
                         
-                        totalAvg = totalAvg + (float)(addressList_cursor->addressList[j]->averageRating);
+                        totalAvg = (float)totalAvg + (float)(addressList_cursor->addressList[j]->averageRating);
                         numOfRecords++;
 
                     }
@@ -529,6 +529,7 @@ void searchStorageRange(int lower, int upper, StorageDisk disk, bool print, bool
                     cout << "avgRating: " << (*((Record *)currentrecord)).averageRating << ", ";
                     cout << "numVotes: " << (*((Record *)currentrecord)).numVotes << endl;
                 }
+
                 if(countNumIndexes){
                     int block = getBlockRecordisIn((Record *)currentrecord, disk, j);
                     if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
@@ -539,7 +540,9 @@ void searchStorageRange(int lower, int upper, StorageDisk disk, bool print, bool
                             // cout << "block added" << endl;
                     }
                 } 
-                totalAvg = totalAvg + (*((Record *)currentrecord)).averageRating;
+                
+                totalAvg = totalAvg + (float)((Record *)currentrecord)->averageRating;
+
                 numOfRecords++;
             }
             
