@@ -1,6 +1,4 @@
-using namespace std;
-
-
+#include <chrono>
 #include "storage.h"
 #include "storage.cpp"
 #include "bplustree_final.h"
@@ -13,6 +11,10 @@ using namespace std;
 #include <string.h>
 #include <algorithm>
 #include <cstring>
+using namespace std::chrono;
+
+
+
 
 #include <bits/stdc++.h>
 
@@ -39,7 +41,7 @@ int main()
 
     Record record; //declare temporary record
     ifstream testData("data/data.tsv"); // reading from file
-    std::ofstream out("output.txt"); // writing to file
+    // std::ofstream out("output.txt"); // writing to file
 
     // std::cout.rdbuf(out.rdbuf()); // redirect std::cout to out.txt!
 
@@ -246,13 +248,14 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
     int numOfIndexAccessed = 0;
     int numOfBlocksAccessed = 0;
     vector<int> blocksAlreadyAccessed; 
-    clock_t start, end;
-    clock_t startLinear, endLinear;
+    // clock_t start, end;
+    // clock_t startLinear, endLinear;
     
     cout << "RETRIEVAL USING BPLUSTREE:" << endl;
     cout << "Key: numVotes = " << keyStruct << endl;
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, keyStruct);
-    start = clock();
+    // start = clock();
+    auto start = high_resolution_clock::now();
     for(int i=0; i<leafNode->numKeys;i++)
     {
         if((leafNode->keyArray[i]) == key)
@@ -292,8 +295,10 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
             }
         }
     }
-    end = clock();
-    double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
+    // end = clock();
+    auto stop = high_resolution_clock::now();
+    // double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
+    std::chrono::duration<double, std::milli> fp_ms = stop-start;
     cout << endl;
 
     cout << "Number of index nodes processed: " << numOfIndexAccessed + tree.numOfLevels << endl;
@@ -301,13 +306,16 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
     float avgAll;
     avgAll = (float)(totalAvg/(float)(numOfRecords));
     cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
-    cout << "Running time of retrieval using BPlusTree: " << fixed << time_taken << setprecision(5) << " seconds" << endl;
+    cout << "Running time of retrieval using BPlusTree: " << fixed << fp_ms.count() << setprecision(5) << " ms" << endl;
 
-    startLinear = clock();
+    // startLinear = clock();
+    auto startLinear = high_resolution_clock::now();
     searchStorageSingle(key, disk, print);
-    endLinear = clock();
-    double time_taken_linear = double(endLinear-startLinear) / double(CLOCKS_PER_SEC);
-    cout << "Running time of retrieval using Linear Search: " << fixed << time_taken_linear << setprecision(5) << " seconds" << endl;
+    // endLinear = clock();
+    auto endLinear = high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> time_taken_linear = endLinear-startLinear;
+    // double time_taken_linear = double(endLinear-startLinear) / double(CLOCKS_PER_SEC);
+    cout << "Running time of retrieval using Linear Search: " << fixed << time_taken_linear.count() << setprecision(5) << " ms" << endl;
     
 
 
@@ -372,9 +380,10 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
     int numOfIndex = 0;
     int numOfBlocksAccessed = 0;
     vector<int> blocksAlreadyAccessed; 
-    clock_t start, end;
-    clock_t startLinear, endLinear;
-    start = clock();
+    // clock_t start, end;
+    // clock_t startLinear, endLinear;
+    // start = clock();
+    auto start = high_resolution_clock::now();
     cout << "RETRIEVAL USING BPLUSTREE:" << endl;
     cout << "Key: numVotes between " << lower << " and " << upper << endl;
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, lower);
@@ -432,21 +441,26 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
         
     }
 
-    end = clock();
-    double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
+    // end = clock();
+    auto stop = high_resolution_clock::now();
+    // double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
+    std::chrono::duration<double, std::milli> time_taken = stop - start;
 
     cout << "Number of index nodes processed: " << tree.numOfLevels + numOfIndexAccessed << endl;
     cout << "Number of data blocks processed: " << numOfBlocksAccessed << endl;
     float avgAll;
     avgAll = (float)(totalAvg/(float)(numOfRecords));
     cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
-    cout << "Running time of retrieval using BPlusTree: " << fixed << time_taken << setprecision(5) << " seconds" << endl;
+    cout << "Running time of retrieval using BPlusTree: " << fixed << time_taken.count() << setprecision(5) << " ms" << endl;
 
-    startLinear = clock();
+    // startLinear = clock();
+    auto startLinear = high_resolution_clock::now();
     searchStorageRange(lower, upper,  disk, print);
-    endLinear = clock();
-    double time_taken_linear = double(endLinear-startLinear) / double(CLOCKS_PER_SEC);
-    cout << "Running time of retrieval using Linear Search: " << fixed << time_taken_linear << setprecision(5) << " seconds" << endl;
+    // endLinear = clock();
+    auto endLinear = high_resolution_clock::now();
+    // double time_taken_linear = double(endLinear-startLinear) / double(CLOCKS_PER_SEC);
+    std::chrono::duration<double, std::milli> time_taken_linear = endLinear-startLinear;
+    cout << "Running time of retrieval using Linear Search: " << fixed << time_taken_linear.count() << setprecision(5) << " ms" << endl;
 }
 
 void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
