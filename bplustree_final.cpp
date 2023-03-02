@@ -257,17 +257,15 @@ void BPlusTree::insertion(int key, void* recAddress)
 void BPlusTree::insertIntoNonLeaf(int key, Node *parentNode, Node *childNode) {
     if (parentNode->numKeys < MAX_KEYS) {
         // If parent node is not full, insert new key into it
-        
-
         int insert_pos = 0;
-
         for (insert_pos = 0; insert_pos < parentNode->numKeys; insert_pos++) {
             if (key <= parentNode->keyArray[insert_pos]) {
                 break;
             }
         }
 
-        for (int index=parentNode->numKeys; index>insert_pos; index--) {
+        for (int index=parentNode->numKeys; index>insert_pos; index--) // shifting
+        {
             parentNode->keyArray[index] = parentNode->keyArray[index-1];
             parentNode->pointerArray[index+1] = parentNode->pointerArray[index];
         }
@@ -292,17 +290,26 @@ void BPlusTree::insertIntoNonLeaf(int key, Node *parentNode, Node *childNode) {
         // Insert new key and pointer into temporary arrays
         int i = 0;
         int j;
-        while (key > tempKeyArray[i] && i < MAX_KEYS) {
-            i++;
+
+        for (i = 0; i < MAX_KEYS; i++) // get position i
+        {
+            if (key <= tempKeyArray[i]) {
+                break;
+            }
         }
-        for (j=MAX_KEYS; j>i; j--) {
+
+        for (j=MAX_KEYS; j>i; j--) // add into temp key array 
+        {
             tempKeyArray[j] = tempKeyArray[j-1];
         }
-        tempKeyArray[i] = key;
-        for (j=MAX_KEYS+1; j>i+1; j--) {
+        tempKeyArray[i] = key; // add key into position i in temp key array
+
+
+        for (j=MAX_KEYS+1; j>i+1; j--) // add into temp ptr array
+        {
             tempPointerArray[j] = tempPointerArray[j-1];
         }
-        tempPointerArray[i+1] = childNode;
+        tempPointerArray[i+1] = childNode; // add ptr to childnode to temp ptr array
 
 
         // Split parent node into two
