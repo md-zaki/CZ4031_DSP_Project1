@@ -144,16 +144,17 @@ int main()
         {
             // ================================== Experiment 5 =====================================
             cout << "============ Experiment 5 ==============" << endl;
-            clock_t starttree, endtree;
+            // clock_t starttree, endtree;
+            
             int key=1000;
             // while(true){
                 // cout << "Enter a number to delete: "; 
                 // cin >> key;
                 key = 1000;
                 cout << "DELETE numVotes with value: "<< key <<  endl;
-                starttree = clock();
+                auto start = high_resolution_clock::now();
                 tree.deleteKey(key);
-                endtree = clock();
+                auto stop = high_resolution_clock::now();
                 if(print)
                 {
                     tree.printTree(tree.rootNode);
@@ -166,15 +167,18 @@ int main()
                 cout << (tree.rootNode)->keyArray[i] << " ";
             }
             cout << endl;
-            double time_taken_tree = double(endtree-starttree) / double(CLOCKS_PER_SEC);
-            cout << "Running time of deletion using BPlusTree: " << fixed << time_taken_tree << setprecision(5) << " seconds" << endl;
+            // double time_taken_tree = double(endtree-starttree) / double(CLOCKS_PER_SEC);
+            std::chrono::duration<double, std::milli> time_taken_tree = stop-start;
+            cout << "Running time of deletion using BPlusTree: " << fixed << time_taken_tree.count() << setprecision(5) << " ms" << endl;
             // }
-            clock_t startscan, endscan;
-            startscan = clock();
+            // clock_t startscan, endscan;
+            // startscan = clock();
+            auto startscan = high_resolution_clock::now();
             deletelinearscan(disk, print, key);
-            endscan = clock();
-            double time_taken_scan = double(endscan-startscan) / double(CLOCKS_PER_SEC);
-            cout << "Running time of deletion using Linear Scan: " << fixed << time_taken_scan << setprecision(5) << " seconds" << endl;
+            auto endscan = high_resolution_clock::now();
+            // double time_taken_scan = double(endscan-startscan) / double(CLOCKS_PER_SEC);
+            std::chrono::duration<double, std::milli> time_taken_scan = endscan-startscan;
+            cout << "Running time of deletion using Linear Scan: " << fixed << time_taken_scan.count() << setprecision(5) << " ms" << endl;
 
             
         }
@@ -484,13 +488,14 @@ void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
             currentrecord = (unsigned char *)selectedblockptr+j; // set current record (block ptr + offset)
             if((*((Record *)currentrecord)).numVotes >= lower && (*((Record *)currentrecord)).numVotes <= upper)
             {
-                int block = getBlockRecordisIn((Record *)currentrecord, disk, j);
+                
                 if(print)
                 {
                     cout << "tcosnt: " << (*((Record *)currentrecord)).tconst << ", ";
                     cout << "avgRating: " << (*((Record *)currentrecord)).averageRating << ", ";
                     cout << "numVotes: " << (*((Record *)currentrecord)).numVotes << endl;
                 }
+                int block = getBlockRecordisIn((Record *)currentrecord, disk, j);
                 if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
                     
                 }
