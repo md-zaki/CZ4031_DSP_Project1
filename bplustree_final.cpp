@@ -353,11 +353,10 @@ Node *BPlusTree::findParentNode(Node *currentNode, Node *childNode) {
     }
     for (int i=0; i<currentNode->numKeys+1; i++) {
         if (currentNode->pointerArray[i] == childNode) {
-            parentNode = currentNode;
-            return parentNode;
+            return currentNode;
         }
         else {
-            parentNode = findParentNode((Node*)currentNode->pointerArray[i], childNode);
+            parentNode = findParentNode((Node*)currentNode->pointerArray[i], childNode); // iterate down the tree
             if (parentNode != nullptr) {
                 return parentNode;
             }
@@ -409,33 +408,33 @@ void BPlusTree::printTree(Node *currentNode) {
         cout << endl;
     }
     //FOR PRINTING THE LINKED ADDRESSLIST
-    // DataAddressList* addressList_cursor; 
-    // Node* next_node;
-    // while(true){    //keep looping through leaf nodes
-    //     next_node = (Node*)first_leaf_node->pointerArray[first_leaf_node->numKeys];
+    DataAddressList* addressList_cursor; 
+    Node* next_node;
+    while(true){    //keep looping through leaf nodes
+        next_node = (Node*)first_leaf_node->pointerArray[first_leaf_node->numKeys];
 
-    //     for(int i=0; i<first_leaf_node->numKeys; i++){  //loop through the each keys in the leaf node
-    //         addressList_cursor = (DataAddressList*) first_leaf_node->pointerArray[i];
-    //         //cout << "--------KEY IS " << first_leaf_node->keyArray[i].value << "----------" << endl;
-    //         while(true){    // loop through the addressList for each key
-    //             for(int j=0; j<addressList_cursor->size; j++){
-    //                 cout << addressList_cursor->addressList[j]->tconst << " ";
-    //                 cout << addressList_cursor->addressList[j]->averageRating << " ";
-    //                 cout << addressList_cursor->addressList[j]->numVotes << endl;
-    //             }
-    //             if(addressList_cursor->nextList == NULL){   //end of linked addressList
-    //                 break;
-    //             }
-    //             addressList_cursor = addressList_cursor->nextList;
-    //         }   
-    //     }
+        for(int i=0; i<first_leaf_node->numKeys; i++){  //loop through the each keys in the leaf node
+            addressList_cursor = (DataAddressList*) first_leaf_node->pointerArray[i];
+            //cout << "--------KEY IS " << first_leaf_node->keyArray[i].value << "----------" << endl;
+            while(true){    // loop through the addressList for each key
+                for(int j=0; j<addressList_cursor->size; j++){
+                    cout << addressList_cursor->addressList[j]->tconst << " ";
+                    cout << addressList_cursor->addressList[j]->averageRating << " ";
+                    cout << addressList_cursor->addressList[j]->numVotes << endl;
+                }
+                if(addressList_cursor->nextList == NULL){   //end of linked addressList
+                    break;
+                }
+                addressList_cursor = addressList_cursor->nextList;
+            }   
+        }
 
-    //     if(next_node == NULL){
-    //         break;
-    //     }
-    //     first_leaf_node = next_node;
-    //     cout << endl;
-    // }
+        if(next_node == NULL){
+            break;
+        }
+        first_leaf_node = next_node;
+        cout << endl;
+    }
 }
 
 
@@ -611,7 +610,7 @@ void BPlusTree::deleteKey(int key){
             leftSibling->pointerArray[i] = leafNode->pointerArray[j];
             i++;
         }
-        leftSibling->numKeys += leafNode->numKeys;
+        leftSibling->numKeys = leftSibling->numKeys + leafNode->numKeys;
         leftSibling->pointerArray[leftSibling->numKeys] = leafNode->pointerArray[leafNode->numKeys];
         numOfNodes--;
         removeInternal(parentNode->keyArray[leftSiblingIndex], parentNode, leafNode);
@@ -627,7 +626,7 @@ void BPlusTree::deleteKey(int key){
             leafNode->pointerArray[i] = rightSibling->pointerArray[j];
             i++;
         }
-        leafNode->numKeys += rightSibling->numKeys;
+        leafNode->numKeys =  leafNode->numKeys + rightSibling->numKeys;
         leafNode->pointerArray[leafNode->numKeys] = rightSibling->pointerArray[rightSibling->numKeys];
         // cout << "key to be removed in internal: " << parentNode->keyArray[rightSiblingIndex - 1] << endl;
         numOfNodes--;
@@ -750,7 +749,6 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
         }
         parent->pointerArray[parent->numKeys+1] = rightSibling->pointerArray[0];
         rightSibling->pointerArray[rightSibling->numKeys-1] = rightSibling->pointerArray[rightSibling->numKeys];
-
         rightSibling->numKeys--;
         parent->numKeys++;
         return;
@@ -769,7 +767,7 @@ void BPlusTree::removeInternal(int key, Node* parent, Node* leaf)
             leftSibling->pointerArray[i] = parent->pointerArray[j];
             parent->pointerArray[j] = NULL;
         }
-        leftSibling->numKeys += parent->numKeys + 1;
+        leftSibling->numKeys = leftSibling->numKeys + parent->numKeys + 1;
         parent->numKeys = 0;
         numOfNodes--;
         removeInternal(parentOfParent->keyArray[leftSiblingIndex], parentOfParent, parent);
