@@ -21,6 +21,7 @@ void searchStorageSingle(int key, StorageDisk disk, bool print);
 void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, bool print);
 void searchStorageRange(int lower, int upper, StorageDisk disk, bool print);
 void deletelinearscan(StorageDisk disk, bool print, int key);
+int getBlockRecordisIn(Record * record, StorageDisk disk, int j);
 
 int main()
 {
@@ -242,7 +243,9 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
     keyStruct = key;
     float totalAvg = 0;
     int numOfRecords = 0;
+    int numOfIndexAccessed = 0;
     int numOfBlocksAccessed = 0;
+    vector<int> blocksAlreadyAccessed; 
     clock_t start, end;
     clock_t startLinear, endLinear;
     
@@ -254,7 +257,7 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
     {
         if((leafNode->keyArray[i]) == key)
         {
-            numOfBlocksAccessed++;
+            numOfIndexAccessed++;
             addressList_cursor = (DataAddressList*) leafNode->pointerArray[i];
             while(true){    // loop through the addressList for each key
                 for(int j=0; j<addressList_cursor->size; j++){
@@ -264,6 +267,18 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
                         cout << "avgRating: " << addressList_cursor->addressList[j]->averageRating << " ";
                         cout << "numVotes: " << addressList_cursor->addressList[j]->numVotes << endl;
                     }
+                    int block;
+                    block = getBlockRecordisIn(addressList_cursor->addressList[j], disk, j);
+                //    cout << "BLOCK: " <<  block <<endl;
+                   if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
+
+                    }
+                    else {
+                            blocksAlreadyAccessed.push_back(block);
+                            numOfBlocksAccessed++;
+                            // cout << "block added" << endl;
+                    }
+
                     
                     totalAvg = totalAvg + (float)(addressList_cursor->addressList[j]->averageRating);
                     numOfRecords++;
@@ -273,7 +288,7 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
                     break;
                 }
                 addressList_cursor = addressList_cursor->nextList;
-                numOfBlocksAccessed++;
+                numOfIndexAccessed++;
             }
         }
     }
@@ -281,8 +296,8 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print)
     double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
     cout << endl;
 
-    cout << "Number of index nodes processed: " << tree.numOfLevels << endl;
-    cout << "Number of data blocks the processed: " << numOfBlocksAccessed + tree.numOfLevels << endl;
+    cout << "Number of index nodes processed: " << numOfIndexAccessed + tree.numOfLevels << endl;
+    cout << "Number of data blocks processed: " << numOfBlocksAccessed << endl;
     float avgAll;
     avgAll = (float)(totalAvg/(float)(numOfRecords));
     cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
@@ -343,8 +358,10 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
     bool check = true;
     float totalAvg = 0;
     int numOfRecords = 0;
-    int numOfBlocksAccessed = 0;
+    int numOfIndexAccessed = 0;
     int numOfIndex = 0;
+    int numOfBlocksAccessed = 0;
+    vector<int> blocksAlreadyAccessed; 
     clock_t start, end;
     clock_t startLinear, endLinear;
     start = clock();
@@ -357,7 +374,7 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
         {
             if((leafNode->keyArray[i]) >= lower && (leafNode->keyArray[i]) <= upper)
             {
-                numOfBlocksAccessed++;
+                numOfIndexAccessed++;
                 check = true;
                 addressList_cursor = (DataAddressList*) leafNode->pointerArray[i];
                 while(true){    // loop through the addressList for each key
@@ -368,6 +385,16 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
                             cout << "avgRating: " << addressList_cursor->addressList[j]->averageRating << " ";
                             cout << "numVotes: " << addressList_cursor->addressList[j]->numVotes << endl;
                         }
+                        int block;
+                        block = getBlockRecordisIn(addressList_cursor->addressList[j], disk, j);
+                        if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
+
+                        }
+                        else {
+                                blocksAlreadyAccessed.push_back(block);
+                                numOfBlocksAccessed++;
+                                // cout << "block added" << endl;
+                        }
                         
                         totalAvg = totalAvg + (float)(addressList_cursor->addressList[j]->averageRating);
                         numOfRecords++;
@@ -377,7 +404,7 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
                         break;
                     }
                     addressList_cursor = addressList_cursor->nextList;
-                    numOfBlocksAccessed++;
+                    numOfIndexAccessed++;
                 }
             }
             else
@@ -389,8 +416,7 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
         // numOfBlocksAccessed++;
         if(check == true)
         {
-            numOfIndex++;
-            numOfBlocksAccessed++;
+            numOfIndexAccessed++;
         }
         
         
@@ -399,8 +425,8 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
     end = clock();
     double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
 
-    cout << "Number of index nodes processed: " << tree.numOfLevels + numOfIndex << endl;
-    cout << "Number of data blocks processed: " << numOfBlocksAccessed + tree.numOfLevels << endl;
+    cout << "Number of index nodes processed: " << tree.numOfLevels + numOfIndexAccessed << endl;
+    cout << "Number of data blocks processed: " << numOfBlocksAccessed << endl;
     float avgAll;
     avgAll = (float)(totalAvg/(float)(numOfRecords));
     cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
@@ -421,6 +447,7 @@ void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
     float totalAvg = 0;
     int numOfRecords = 0;
     int numofblocks=0;
+    vector<int> blocksAlreadyAccessed; 
     for(int i = 0; i <= disk.numUsedBlocks; i++)
     {
         void *currentrecord; // declare pointer for record to be listed
@@ -431,13 +458,19 @@ void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
             currentrecord = (unsigned char *)selectedblockptr+j; // set current record (block ptr + offset)
             if((*((Record *)currentrecord)).numVotes >= lower && (*((Record *)currentrecord)).numVotes <= upper)
             {
+                int block = getBlockRecordisIn((Record *)currentrecord, disk, j);
                 if(print)
                 {
                     cout << "tcosnt: " << (*((Record *)currentrecord)).tconst << ", ";
                     cout << "avgRating: " << (*((Record *)currentrecord)).averageRating << ", ";
                     cout << "numVotes: " << (*((Record *)currentrecord)).numVotes << endl;
                 }
-                
+                if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
+                }
+                else {
+                        blocksAlreadyAccessed.push_back(block);
+                        // cout << "block added" << endl;
+                }
                 totalAvg = totalAvg + (*((Record *)currentrecord)).averageRating;
                 numOfRecords++;
             }
@@ -451,4 +484,26 @@ void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
     avgAll = (float)(totalAvg/(float)(numOfRecords));
     cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
 
+}
+
+int getBlockRecordisIn(Record * record, StorageDisk disk, int j)
+{
+    int block=0;
+
+    while(true)
+    {
+        unsigned char * currentBlock;
+        currentBlock = (unsigned char *)disk.diskPtr + disk.blockSize * block;
+        if((unsigned int*) record < (unsigned int *)currentBlock)
+        {
+            break;
+        }
+        else if(block > disk.numUsedBlocks)
+        {
+            break;
+        }
+        else block++;
+    }
+
+    return block;
 }
