@@ -38,6 +38,10 @@ int main()
 
     Record record; //declare temporary record
     ifstream testData("data/data.tsv"); // reading from file
+    std::ofstream out("output.txt"); // writing to file
+
+    std::cout.rdbuf(out.rdbuf()); // redirect std::cout to out.txt!
+
     int count = 0;
 
     if (testData.is_open()){
@@ -76,9 +80,10 @@ int main()
     cout << "Key in Experiment to conduct: 1, 2, 3, 4 or 5" << endl;
     cout << "Key in 0 to exit" << endl;
     cout << "Experiment: " ;
-    int choice;
-    cin >> choice;
-    while(choice != 0)
+    //int choice;
+    int choice=1; //if output to file, and cycle thru all experiments
+    //cin >> choice; //comment if cycling thru all experiments
+    while(choice != 6)
     {
         if(choice == 1)
         {
@@ -137,7 +142,7 @@ int main()
             // ================================== Experiment 5 =====================================
             cout << "============ Experiment 5 ==============" << endl;
             clock_t starttree, endtree;
-            int key;
+            int key=1000;
             // while(true){
                 // cout << "Enter a number to delete: "; 
                 // cin >> key;
@@ -175,7 +180,8 @@ int main()
         cout << "Key in Experiment to conduct: 1, 2, 3, 4 or 5" << endl;
         cout << "Key in 0 to exit" << endl;
         cout << "Choice: " ;
-        cin >> choice;
+        //cin >> choice; //comment if cycling thru all experiments
+        choice++; //if cycling thru all experiments
     }
     // ================================== Listing contents of a block =====================
     // int blocknum;
@@ -200,6 +206,9 @@ int main()
     // }
     
     // ====================================================================================
+
+    out.close(); //closing output file
+ 
     return 0;
 }
 
