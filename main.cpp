@@ -177,9 +177,9 @@ int main()
         }
 
         cout << "============================================" << endl;
-        cout << "Key in Experiment to conduct: 1, 2, 3, 4 or 5" << endl;
-        cout << "Key in 0 to exit" << endl;
-        cout << "Choice: " ;
+        // cout << "Key in Experiment to conduct: 1, 2, 3, 4 or 5" << endl;
+        // cout << "Key in 0 to exit" << endl;
+        // cout << "Choice: " ;
         //cin >> choice; //comment if cycling thru all experiments
         choice++; //if cycling thru all experiments
     }
