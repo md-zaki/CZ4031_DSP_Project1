@@ -40,7 +40,7 @@ int main()
     ifstream testData("data/data.tsv"); // reading from file
     std::ofstream out("output.txt"); // writing to file
 
-    std::cout.rdbuf(out.rdbuf()); // redirect std::cout to out.txt!
+    // std::cout.rdbuf(out.rdbuf()); // redirect std::cout to out.txt!
 
     int count = 0;
 
@@ -207,7 +207,7 @@ int main()
     
     // ====================================================================================
 
-    out.close(); //closing output file
+    // out.close(); //closing output file
  
     return 0;
 }
