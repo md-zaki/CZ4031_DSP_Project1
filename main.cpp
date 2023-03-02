@@ -20,8 +20,8 @@ using namespace std::chrono;
 
 void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print, bool countNumIndexes);
 void searchStorageSingle(int key, StorageDisk disk, bool print, bool countNumIndexes);
-void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, bool print);
-void searchStorageRange(int lower, int upper, StorageDisk disk, bool print);
+void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, bool print, bool countNumIndexes);
+void searchStorageRange(int lower, int upper, StorageDisk disk, bool print, bool countNumIndexes);
 void deletelinearscan(StorageDisk disk, bool print, int key);
 int getBlockRecordisIn(Record * record, StorageDisk disk, int j);
 
@@ -129,12 +129,12 @@ int main()
         {
             // ================================== Experiment 3 =====================================
             cout << "============ Experiment 3 ==============" << endl;
-            searchTreeSingle(500, tree, disk, print, true); //perform search while counting nodes accessed
-            searchTreeSingle(500, tree, disk, print, false);   //perform search to calculate time taken
+            searchTreeSingle(500, tree, disk, print, true); //perform search while counting index/data blocks accessed
+            searchTreeSingle(500, tree, disk, print, false);   //perform search to calculate time taken for b+ tree
 
-            searchStorageSingle(500, disk, print, true);
+            searchStorageSingle(500, disk, print, true);    //perform search to count data blocks accessed
             auto startLinear = high_resolution_clock::now();
-            searchStorageSingle(500, disk, print, false);
+            searchStorageSingle(500, disk, print, false);   //perform search to calculate time taken for linear
             auto endLinear = high_resolution_clock::now();
             std::chrono::duration<double, std::milli> time_taken_linear = endLinear-startLinear;
 
@@ -147,7 +147,17 @@ int main()
             cout << "============ Experiment 4 ==============" << endl;
             int lower = 30000;
             int upper = 40000;
-            searchTreeRange(lower,upper,tree,disk, print);
+            searchTreeRange(lower,upper,tree,disk, print, true); //perform search while counting index/data blocks accessed
+            searchTreeRange(lower,upper,tree,disk, print, false); //perform search to calculate time taken for b+ tree
+
+            searchStorageRange(lower, upper,  disk, print, true); //perform search to count data blocks accessed
+            auto startLinear = high_resolution_clock::now();
+            searchStorageRange(lower, upper,  disk, print, false); //perform search to calculate time taken for linear
+            // endLinear = clock();
+            auto endLinear = high_resolution_clock::now();
+            // double time_taken_linear = double(endLinear-startLinear) / double(CLOCKS_PER_SEC);
+            std::chrono::duration<double, std::milli> time_taken_linear = endLinear-startLinear;
+            cout << "Running time of retrieval using Linear Search: " << fixed << time_taken_linear.count() << setprecision(5) << " ms" << endl;
         }   
         else if(choice == 5)
         {
@@ -316,8 +326,7 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print, boo
     auto stop = high_resolution_clock::now();
     // double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
     std::chrono::duration<double, std::milli> fp_ms = stop-start;
-    cout << endl;
-
+    
     if(countNumIndexes){
         cout << "Number of index nodes processed: " << numOfIndexAccessed + tree.numOfLevels << endl;
         cout << "Number of data blocks processed: " << numOfBlocksAccessed << endl;
@@ -327,7 +336,7 @@ void searchTreeSingle(int key, BPlusTree tree, StorageDisk disk, bool print, boo
     avgAll = (float)(totalAvg/(float)(numOfRecords));
 
     if(countNumIndexes){
-        cout << "Average of averageRatings of all returned records: " << avgAll;
+        cout << "Average of averageRatings of all returned records: " << avgAll << endl;
     }
     if(!countNumIndexes){
         cout << "Running time of retrieval using BPlusTree: " << fixed << fp_ms.count() << setprecision(5) << " ms" << endl;
@@ -398,7 +407,7 @@ void searchStorageSingle(int key, StorageDisk disk, bool print, bool countNumInd
     }
 
 }
-void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, bool print)
+void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, bool print, bool countNumIndexes)
 {
     DataAddressList* addressList_cursor;
     bool check = true;
@@ -412,8 +421,10 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
     // clock_t startLinear, endLinear;
     // start = clock();
     
-    cout << "RETRIEVAL USING BPLUSTREE:" << endl;
-    cout << "Key: numVotes between " << lower << " and " << upper << endl;
+    if(countNumIndexes){
+        cout << "RETRIEVAL USING BPLUSTREE:" << endl;
+        cout << "Key: numVotes between " << lower << " and " << upper << endl;
+    }
     auto start = high_resolution_clock::now();
     auto [leafNode,parentNode] = tree.traverseNonLeaf(tree.rootNode, lower);
     while(check)
@@ -434,14 +445,16 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
                             cout << "numVotes: " << addressList_cursor->addressList[j]->numVotes << endl;
                         }
                         int block;
-                        block = getBlockRecordisIn(addressList_cursor->addressList[j], disk, j);
-                        if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
+                        if(countNumIndexes){
+                            block = getBlockRecordisIn(addressList_cursor->addressList[j], disk, j);
+                            if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
 
-                        }
-                        else {
-                                blocksAlreadyAccessed.push_back(block);
-                                numOfBlocksAccessed++;
-                                // cout << "block added" << endl;
+                            }
+                            else {
+                                    blocksAlreadyAccessed.push_back(block);
+                                    numOfBlocksAccessed++;
+                                    // cout << "block added" << endl;
+                            }
                         }
                         
                         totalAvg = totalAvg + (float)(addressList_cursor->addressList[j]->averageRating);
@@ -475,28 +488,26 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
     // double time_taken = double(end-start) / double(CLOCKS_PER_SEC);
     std::chrono::duration<double, std::milli> time_taken = stop - start;
 
-    cout << "Number of index nodes processed: " << tree.numOfLevels + numOfIndexAccessed << endl;
-    cout << "Number of data blocks processed: " << numOfBlocksAccessed << endl;
     float avgAll;
     avgAll = (float)(totalAvg/(float)(numOfRecords));
-    cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
-    cout << "Running time of retrieval using BPlusTree: " << fixed << time_taken.count() << setprecision(5) << " ms" << endl;
+    if(countNumIndexes){
+        cout << "Number of index nodes processed: " << tree.numOfLevels + numOfIndexAccessed << endl;
+        cout << "Number of data blocks processed: " << numOfBlocksAccessed << endl;
+        cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
+    }else{
+        cout << "Running time of retrieval using BPlusTree: " << fixed << time_taken.count() << setprecision(5) << " ms" << endl;
+    }
 
     // startLinear = clock();
-    auto startLinear = high_resolution_clock::now();
-    searchStorageRange(lower, upper,  disk, print);
-    // endLinear = clock();
-    auto endLinear = high_resolution_clock::now();
-    // double time_taken_linear = double(endLinear-startLinear) / double(CLOCKS_PER_SEC);
-    std::chrono::duration<double, std::milli> time_taken_linear = endLinear-startLinear;
-    cout << "Running time of retrieval using Linear Search: " << fixed << time_taken_linear.count() << setprecision(5) << " ms" << endl;
 }
 
-void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
+void searchStorageRange(int lower, int upper, StorageDisk disk, bool print, bool countNumIndexes)
 {
     cout << endl;
-    cout << "RETRIEVAL USING LINEAR SEARCH:" << endl;
-    cout << "Key: numVotes between " << lower << " and " << upper << endl;
+    if(countNumIndexes){
+        cout << "RETRIEVAL USING LINEAR SEARCH:" << endl;
+        cout << "Key: numVotes between " << lower << " and " << upper << endl;
+    }
     float totalAvg = 0;
     int numOfRecords = 0;
     int numofblocks=0;
@@ -518,14 +529,16 @@ void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
                     cout << "avgRating: " << (*((Record *)currentrecord)).averageRating << ", ";
                     cout << "numVotes: " << (*((Record *)currentrecord)).numVotes << endl;
                 }
-                int block = getBlockRecordisIn((Record *)currentrecord, disk, j);
-                if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
-                    
-                }
-                else {
-                        blocksAlreadyAccessed.push_back(block);
-                        // cout << "block added" << endl;
-                }
+                if(countNumIndexes){
+                    int block = getBlockRecordisIn((Record *)currentrecord, disk, j);
+                    if (std::find(blocksAlreadyAccessed.begin(), blocksAlreadyAccessed.end(), block) != blocksAlreadyAccessed.end()) {
+                        
+                    }
+                    else {
+                            blocksAlreadyAccessed.push_back(block);
+                            // cout << "block added" << endl;
+                    }
+                } 
                 totalAvg = totalAvg + (*((Record *)currentrecord)).averageRating;
                 numOfRecords++;
             }
@@ -534,11 +547,12 @@ void searchStorageRange(int lower, int upper, StorageDisk disk, bool print)
         numofblocks++;
     }
 
-    cout << "Number of data blocks accessed: " << numofblocks << endl;
-    float avgAll;
-    avgAll = (float)(totalAvg/(float)(numOfRecords));
-    cout << "Average of averageRatings of all returned records: " << avgAll<< endl;
-
+    if(countNumIndexes){
+        cout << "Number of data blocks accessed: " << numofblocks << endl;
+        float avgAll;
+        avgAll = (float)(totalAvg/(float)(numOfRecords));
+        cout << "Average of averageRatings of all returned records: " << avgAll;
+    }
 }
 
 int getBlockRecordisIn(Record * record, StorageDisk disk, int j)
