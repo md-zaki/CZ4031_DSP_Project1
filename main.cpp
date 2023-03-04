@@ -474,6 +474,10 @@ void searchTreeRange(int lower, int upper, BPlusTree tree, StorageDisk disk, boo
             }
         }
         leafNode = (Node*)leafNode->pointerArray[leafNode->numKeys];
+        if(leafNode == NULL || leafNode == nullptr)
+        {
+            check = false;
+        }
         // numOfBlocksAccessed++;
         if(check == true)
         {
