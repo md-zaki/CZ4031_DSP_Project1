@@ -76,7 +76,7 @@ class StorageDisk {
          * @param record the record struct to be inserted into block
          * @returns nothing
         */
-        void recordIntoBlock(Record record);
+        void * recordIntoBlock(Record record);
 };
 
 

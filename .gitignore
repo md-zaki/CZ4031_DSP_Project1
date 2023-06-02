@@ -6,3 +6,5 @@
 .vscode/settings.json
 
 junk.txt
+*.tsv
+output.txt
